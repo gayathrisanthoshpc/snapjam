@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <title>snapjam — your story's soundtrack</title>
+  <meta name="description" content="Upload your Instagram story photo and get 3 perfect song matches from around the world."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #07070d;
+      --surface: rgba(255,255,255,0.04);
+      --surface2: rgba(255,255,255,0.06);
+      --glass: rgba(255,255,255,0.045);
+      --glass-border: rgba(255,255,255,0.09);
+      --glass-bright: rgba(255,255,255,0.18);
+      --text: #f0eeff;
+      --text2: #9a97ba;
+      --text3: #52506e;
+      --pink: #ff3cac;
+      --violet: #6c4fff;
+      --teal: #00e5c0;
+      --gold: #ffb830;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bot: env(safe-area-inset-bottom, 0px);
+    }
+
+    html, body {
+      height: 100%; overflow: hidden;
+      background: var(--bg); color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ─── Background ─── */
+    .bg-layer {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    }
+    .bg-mesh {
+      position: absolute; inset: -30%;
+      background:
+        radial-gradient(ellipse 55% 45% at 15% 15%, rgba(255,60,172,0.2) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 55% at 85% 85%, rgba(108,79,255,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 35% at 65% 25%, rgba(0,229,192,0.1) 0%, transparent 55%);
+      animation: meshMove 18s ease-in-out infinite alternate;
+    }
+    @keyframes meshMove {
+      0%   { transform: translate(0,0) scale(1); }
+      100% { transform: translate(2%,3%) scale(1.05); }
+    }
+    .bg-grain {
+      position: absolute; inset: 0; opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    }
+
+    /* ─── App shell ─── */
+    .app-shell {
+      position: relative; z-index: 1;
+      width: 100%; height: 100dvh;
+      overflow: hidden;
+      max-width: 430px; margin: 0 auto;
+    }
+
+    /* ─── Pages ─── */
+    .page {
+      position: absolute; inset: 0;
+      overflow-y: auto; overflow-x: hidden;
+      padding: max(var(--safe-top), 20px) 22px max(var(--safe-bot), 84px);
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                  opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform, opacity;
+    }
+    .page.hidden-left  { transform: translateX(-100%); opacity: 0; pointer-events: none; }
+    .page.hidden-right { transform: translateX(100%);  opacity: 0; pointer-events: none; }
+    .page.active       { transform: translateX(0);     opacity: 1; pointer-events: all; }
+
+    /* ─── Bottom nav ─── */
+    .bottom-nav {
+      position: fixed;
+      bottom: max(var(--safe-bot), 12px); left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      background: rgba(10,10,18,0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: 28px;
+      padding: 8px 8px;
+      display: flex; gap: 4px;
+      animation: navIn 0.7s 0.3s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes navIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    .nav-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px; padding: 8px 18px; border-radius: 22px;
+      border: none; background: transparent; cursor: pointer;
+      transition: background 0.25s, transform 0.2s;
+      color: var(--text3); font-family: inherit;
+      -webkit-user-select: none; user-select: none;
+      min-width: 70px;
+    }
+    .nav-btn.active {
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+    }
+    .nav-btn:active { transform: scale(0.95); }
+    .nav-icon { font-size: 18px; line-height: 1; }
+    .nav-label { font-size: 10px; font-weight: 500; letter-spacing: 0.04em; }
+    .nav-btn.active .nav-label { color: var(--text); }
+
+    /* ─── Shared components ─── */
+    .logo-text {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px; font-weight: 800; letter-spacing: -0.8px;
+      text-decoration: none; color: var(--text);
+    }
+    .logo-text .jam { color: var(--pink); }
+
+    .glass-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      position: relative; overflow: hidden;
+    }
+    .glass-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 10%; right: 10%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--glass-bright), transparent);
+      pointer-events: none;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, var(--pink) 0%, var(--violet) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ─── PAGE 1: LANDING ─── */
+    #page-landing .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 36px;
+      animation: fadeDown 0.6s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .live-badge {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 10px; font-weight: 500; color: var(--teal);
+      letter-spacing: 0.08em; text-transform: uppercase;
+      border: 1px solid rgba(0,229,192,0.2);
+      padding: 5px 11px; border-radius: 20px;
+      background: rgba(0,229,192,0.06);
+    }
+    .live-badge::before {
+      content: ''; width: 5px; height: 5px; border-radius: 50%;
+      background: var(--teal); box-shadow: 0 0 8px var(--teal);
+      animation: blink 2.5s ease infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+    .hero-section {
+      margin-bottom: 32px;
+      animation: fadeDown 0.6s 0.07s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .eyebrow {
+      font-size: 10px; font-weight: 500; color: var(--text3);
+      letter-spacing: 0.14em; text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .eyebrow::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--glass-border), transparent);
+    }
+    .hero-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(34px, 10vw, 46px);
+      font-weight: 800; line-height: 1.05;
+      letter-spacing: -1.5px; margin-bottom: 14px;
+    }
+    .hero-sub {
+      font-size: 15px; color: var(--text2);
+      line-height: 1.65; font-weight: 300; max-width: 300px;
+    }
+
+    .cta-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 17px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px; font-weight: 500;
+      border-radius: 18px; border: none;
+      background: linear-gradient(135deg, var(--pink) 0%, var(--violet) 100%);
+      color: #fff; cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: transform 0.2s, opacity 0.2s;
+      margin-bottom: 32px;
+      animation: fadeUp 0.6s 0.14s cubic-bezier(0.16,1,0.3,1) both;
+      -webkit-user-select: none; user-select: none;
+    }
+    .cta-btn::before {
+      content: '';
+      position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+      transition: left 0.5s ease;
+    }
+    .cta-btn:hover::before { left: 150%; }
+    .cta-btn:active { transform: scale(0.98); opacity: 0.9; }
+
+    /* How it works */
+    .section-title {
+      font-size: 10px; font-weight: 500; color: var(--text3);
+      letter-spacing: 0.14em; text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .steps-grid {
+      display: flex; flex-direction: column; gap: 10px;
+      margin-bottom: 24px;
+      animation: fadeUp 0.6s 0.2s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .step-card {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 18px;
+    }
+    .step-num {
+      width: 36px; height: 36px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .step-num.s1 { background: rgba(255,60,172,0.15); }
+    .step-num.s2 { background: rgba(108,79,255,0.15); }
+    .step-num.s3 { background: rgba(0,229,192,0.15); }
+    .step-text { flex: 1; }
+    .step-title { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+    .step-desc  { font-size: 12px; color: var(--text2); font-weight: 300; line-height: 1.5; }
+
+    /* Stats row */
+    .stats-row {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px; margin-bottom: 12px;
+      animation: fadeUp 0.6s 0.26s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .stat-card {
+      padding: 16px 12px; text-align: center;
+    }
+    .stat-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px; font-weight: 800;
+      letter-spacing: -0.5px; margin-bottom: 4px;
+    }
+    .stat-label { font-size: 11px; color: var(--text3); font-weight: 300; }
+
+    /* ─── PAGE 2: APP ─── */
+    #page-app .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 22px;
+      animation: fadeDown 0.5s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px; font-weight: 800; letter-spacing: -0.5px;
+    }
+    .page-sub { font-size: 12px; color: var(--text2); font-weight: 300; margin-top: 2px; }
+
+    .app-card {
+      padding: 20px; flex: 1;
+      animation: fadeUp 0.5s 0.08s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    #preview {
+      width: 100%; aspect-ratio: 9/13;
+      object-fit: cover; border-radius: 18px;
+      border: 1px solid var(--glass-border);
+      display: none; margin-bottom: 16px;
+      animation: scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .upload-zone {
+      min-height: 190px; border-radius: 18px;
+      border: 1.5px dashed var(--glass-border);
+      background: rgba(255,255,255,0.025);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      cursor: pointer; padding: 28px 20px; gap: 0;
+      transition: border-color 0.25s, background 0.25s, transform 0.2s;
+      position: relative; overflow: hidden;
+      -webkit-user-select: none; user-select: none;
+    }
+    .upload-zone:active, .upload-zone.drag-over {
+      border-color: var(--pink);
+      background: rgba(255,60,172,0.05);
+      transform: scale(0.99);
+    }
+    .u-ring {
+      width: 64px; height: 64px; border-radius: 50%;
+      border: 1.5px solid var(--glass-bright);
+      background: rgba(255,60,172,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; margin-bottom: 14px;
+      position: relative;
+    }
+    .u-ring::before {
+      content: ''; position: absolute; inset: -7px; border-radius: 50%;
+      border: 1px solid rgba(255,60,172,0.22);
+      animation: ringPulse 3s ease infinite;
+    }
+    @keyframes ringPulse { 0%,100%{transform:scale(1);opacity:.6} 50%{transform:scale(1.12);opacity:.12} }
+    .u-title { font-size: 15px; font-weight: 500; margin-bottom: 5px; text-align: center; }
+    .u-sub   { font-size: 12px; color: var(--text3); font-weight: 300; }
+
+    /* Loading */
+    #loadingSection {
+      display: none; min-height: 190px;
+      flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+    }
+    .waveform {
+      display: flex; align-items: center; gap: 4px; height: 36px;
+    }
+    .wv {
+      width: 3px; border-radius: 2px;
+      animation: wvBounce 1.2s ease-in-out infinite;
+    }
+    .wv:nth-child(1){background:var(--pink);   animation-delay:0s;   height:10px}
+    .wv:nth-child(2){background:var(--pink);   animation-delay:.1s;  height:16px}
+    .wv:nth-child(3){background:var(--violet); animation-delay:.2s;  height:24px}
+    .wv:nth-child(4){background:var(--violet); animation-delay:.3s;  height:32px}
+    .wv:nth-child(5){background:var(--teal);   animation-delay:.4s;  height:24px}
+    .wv:nth-child(6){background:var(--teal);   animation-delay:.3s;  height:16px}
+    .wv:nth-child(7){background:var(--violet); animation-delay:.2s;  height:24px}
+    .wv:nth-child(8){background:var(--pink);   animation-delay:.1s;  height:16px}
+    .wv:nth-child(9){background:var(--pink);   animation-delay:0s;   height:10px}
+    @keyframes wvBounce { 0%,100%{transform:scaleY(.35);opacity:.5} 50%{transform:scaleY(1);opacity:1} }
+    .loading-label { font-size: 13px; color: var(--text2); font-weight: 300; }
+    .loading-label span { animation: dotPulse 1.4s ease infinite; display: inline-block; }
+    .loading-label span:nth-child(2){animation-delay:.2s}
+    .loading-label span:nth-child(3){animation-delay:.4s}
+    @keyframes dotPulse { 0%,80%,100%{opacity:.3} 40%{opacity:1} }
+
+    /* Results */
+    #resultsSection { display: none; flex-direction: column; }
+    .results-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .results-label {
+      font-size: 10px; font-weight: 500; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--text3);
+    }
+    .retry-btn {
+      font-size: 12px; color: var(--pink);
+      background: none; border: none; cursor: pointer;
+      font-family: inherit; font-weight: 500; padding: 0;
+      transition: opacity 0.2s;
+    }
+    .retry-btn:active { opacity: 0.6; }
+
+    .song-list { display: flex; flex-direction: column; gap: 10px; }
+    .song-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 13px;
+      position: relative; overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+      animation: cardIn 0.45s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .song-card::before {
+      content: ''; position: absolute; inset: 0; border-radius: 18px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04), transparent);
+      pointer-events: none;
+    }
+    .song-card:nth-child(1){animation-delay:.05s}
+    .song-card:nth-child(2){animation-delay:.12s}
+    .song-card:nth-child(3){animation-delay:.19s}
+    .song-card:active { transform: scale(0.98); border-color: var(--glass-bright); }
+    @keyframes cardIn {
+      from { opacity:0; transform:translateY(14px) scale(0.97); }
+      to   { opacity:1; transform:translateY(0) scale(1); }
+    }
+    .snum {
+      width: 34px; height: 34px; border-radius: 50%;
+      font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      position: relative;
+    }
+    .snum::after {
+      content: ''; position: absolute; inset: -2px; border-radius: 50%;
+      border: 1px solid currentColor; opacity: 0.35;
+    }
+    .snum.n1{background:rgba(255,60,172,0.18); color:var(--pink)}
+    .snum.n2{background:rgba(108,79,255,0.18); color:var(--violet)}
+    .snum.n3{background:rgba(0,229,192,0.18);  color:var(--teal)}
+    .sinfo { flex: 1; min-width: 0; }
+    .stitle {
+      font-size: 15px; font-weight: 500; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
+    }
+    .sartist {
+      font-size: 12px; color: var(--text2); font-weight: 300;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .slang {
+      font-size: 10px; font-weight: 500; padding: 4px 9px;
+      border-radius: 20px; border: 1px solid var(--glass-bright);
+      color: var(--text3); flex-shrink: 0;
+      white-space: nowrap; letter-spacing: 0.06em; text-transform: uppercase;
+      background: rgba(255,255,255,0.04);
+    }
+    .hint {
+      font-size: 11px; color: var(--text3);
+      text-align: center; margin-top: 14px;
+      font-weight: 300; line-height: 1.6;
+    }
+
+    .error-msg {
+      font-size: 13px; color: #ff5f6d;
+      text-align: center; margin-top: 10px; display: none;
+      padding: 10px 14px; border-radius: 12px;
+      background: rgba(255,95,109,0.08);
+      border: 1px solid rgba(255,95,109,0.15);
+    }
+
+    .analyze-btn {
+      width: 100%; padding: 16px; margin-top: 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px; font-weight: 500;
+      border-radius: 18px; border: none;
+      background: linear-gradient(135deg, var(--pink) 0%, var(--violet) 100%);
+      color: #fff; cursor: pointer; display: none;
+      position: relative; overflow: hidden;
+      transition: transform 0.2s, opacity 0.2s;
+      -webkit-user-select: none; user-select: none;
+    }
+    .analyze-btn::before {
+      content: ''; position: absolute; top:0; left:-100%; width:60%; height:100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent);
+      transition: left 0.5s;
+    }
+    .analyze-btn:hover::before { left: 150%; }
+    .analyze-btn:active { transform: scale(0.98); opacity: 0.9; }
+
+    /* ─── PAGE 3: ABOUT ─── */
+    #page-about .about-header {
+      margin-bottom: 28px;
+      animation: fadeDown 0.5s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .about-eyebrow {
+      font-size: 10px; font-weight: 500; color: var(--text3);
+      letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px;
+    }
+    .about-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 30px; font-weight: 800;
+      letter-spacing: -1px; line-height: 1.1; margin-bottom: 10px;
+    }
+    .about-sub { font-size: 14px; color: var(--text2); line-height: 1.65; font-weight: 300; }
+
+    .about-section { margin-bottom: 20px; animation: fadeUp 0.5s 0.1s cubic-bezier(0.16,1,0.3,1) both; }
+    .about-card { padding: 20px 22px; }
+    .about-card-title {
+      font-size: 13px; font-weight: 500; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .about-card-title span { font-size: 16px; }
+    .about-card-body { font-size: 13px; color: var(--text2); line-height: 1.7; font-weight: 300; }
+
+    .team-section {
+      margin-bottom: 20px;
+      animation: fadeUp 0.5s 0.18s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .team-card { padding: 20px 22px; }
+    .avatar-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+    .avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(255,60,172,0.25), rgba(108,79,255,0.25));
+      border: 1px solid var(--glass-bright);
+    }
+    .avatar-info .name { font-size: 15px; font-weight: 500; margin-bottom: 2px; }
+    .avatar-info .role { font-size: 12px; color: var(--text2); font-weight: 300; }
+    .avatar-bio { font-size: 13px; color: var(--text2); line-height: 1.65; font-weight: 300; }
+
+    .tech-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      animation: fadeUp 0.5s 0.24s cubic-bezier(0.16,1,0.3,1) both;
+      margin-bottom: 20px;
+    }
+    .tech-card { padding: 16px 18px; }
+    .tech-icon { font-size: 22px; margin-bottom: 8px; }
+    .tech-name { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+    .tech-desc { font-size: 11px; color: var(--text3); font-weight: 300; line-height: 1.5; }
+
+    .cta-section {
+      animation: fadeUp 0.5s 0.3s cubic-bezier(0.16,1,0.3,1) both;
+      margin-bottom: 8px;
+    }
+    .cta-card {
+      padding: 24px 22px; text-align: center;
+      background: linear-gradient(135deg, rgba(255,60,172,0.08), rgba(108,79,255,0.1));
+      border: 1px solid rgba(255,60,172,0.2);
+    }
+    .cta-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+    .cta-desc  { font-size: 13px; color: var(--text2); font-weight: 300; line-height: 1.6; margin-bottom: 18px; }
+    .cta-mini-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 12px 24px; border-radius: 14px; border: none;
+      background: linear-gradient(135deg, var(--pink), var(--violet));
+      color: #fff; font-family: inherit; font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: transform 0.2s, opacity 0.2s;
+    }
+    .cta-mini-btn:active { transform: scale(0.97); opacity: 0.9; }
+
+    /* Shared animations */
+    @keyframes fadeDown {
+      from { opacity:0; transform:translateY(-14px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(18px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-layer">
+  <div class="bg-mesh"></div>
+  <div class="bg-grain"></div>
+</div>
+
+<!-- App shell -->
+<div class="app-shell">
+
+  <!-- ═══════════ PAGE 1: LANDING ═══════════ -->
+  <div class="page active" id="page-landing">
+    <div class="topbar">
+      <a class="logo-text" href="#">snap<span class="jam">jam</span></a>
+      <div class="live-badge">live</div>
+    </div>
+
+    <div class="hero-section">
+      <div class="eyebrow">AI music matcher</div>
+      <h1 class="hero-title">Your photo.<br><span class="gradient-text">Perfect song.</span></h1>
+      <p class="hero-sub">Upload any story photo and get 3 global songs that match your exact vibe — in seconds.</p>
+    </div>
+
+    <button class="cta-btn" onclick="goTo('app')">
+      Try it now — it's free ✦
+    </button>
+
+    <p class="section-title">How it works</p>
+    <div class="steps-grid">
+      <div class="glass-card step-card">
+        <div class="step-num s1">📸</div>
+        <div class="step-text">
+          <div class="step-title">Upload your photo</div>
+          <div class="step-desc">Any Instagram story photo — selfie, landscape, aesthetic shot.</div>
+        </div>
+      </div>
+      <div class="glass-card step-card">
+        <div class="step-num s2">🤖</div>
+        <div class="step-text">
+          <div class="step-title">AI reads the vibe</div>
+          <div class="step-desc">Claude AI analyzes mood, colors, energy and context of your photo.</div>
+        </div>
+      </div>
+      <div class="glass-card step-card">
+        <div class="step-num s3">🎵</div>
+        <div class="step-text">
+          <div class="step-title">Get 3 global songs</div>
+          <div class="step-desc">3 trending songs from different languages — all on Instagram music.</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-title">By the numbers</p>
+    <div class="stats-row">
+      <div class="glass-card stat-card">
+        <div class="stat-val gradient-text">3</div>
+        <div class="stat-label">Songs per photo</div>
+      </div>
+      <div class="glass-card stat-card">
+        <div class="stat-val gradient-text">50+</div>
+        <div class="stat-label">Languages</div>
+      </div>
+      <div class="glass-card stat-card">
+        <div class="stat-val gradient-text">0$</div>
+        <div class="stat-label">Forever free</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ PAGE 2: APP ═══════════ -->
+  <div class="page hidden-right" id="page-app">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Find your song</div>
+        <div class="page-sub">Drop your story photo below</div>
+      </div>
+      <a class="logo-text" href="#" style="font-size:18px">snap<span class="jam">jam</span></a>
+    </div>
+
+    <div class="glass-card app-card">
+      <img id="preview" src="" alt="Story preview"/>
+
+      <div class="upload-zone" id="uploadZone"
+        onclick="document.getElementById('fileInput').click()"
+        ondragover="handleDragOver(event)"
+        ondragleave="handleDragLeave(event)"
+        ondrop="handleDrop(event)">
+        <div class="u-ring">📸</div>
+        <p class="u-title">Tap to upload your story</p>
+        <p class="u-sub">jpg · png · webp · heic</p>
+        <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(event)"/>
+      </div>
+
+      <div id="loadingSection">
+        <div class="waveform">
+          <div class="wv"></div><div class="wv"></div><div class="wv"></div>
+          <div class="wv"></div><div class="wv"></div><div class="wv"></div>
+          <div class="wv"></div><div class="wv"></div><div class="wv"></div>
+        </div>
+        <p class="loading-label">Reading your vibe<span>.</span><span>.</span><span>.</span></p>
+      </div>
+
+      <div id="resultsSection">
+        <div class="results-header">
+          <span class="results-label">Your matches</span>
+          <button class="retry-btn" onclick="resetApp()">↺ Try another</button>
+        </div>
+        <div class="song-list" id="songList"></div>
+        <p class="hint">Search these on Instagram music to add to your story 🎵</p>
+      </div>
+
+      <p class="error-msg" id="errorMsg">Something went wrong — please try again.</p>
+      <button class="analyze-btn" id="analyzeBtn" onclick="analyzePhoto()">Find my songs →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ PAGE 3: ABOUT ═══════════ -->
+  <div class="page hidden-right" id="page-about">
+    <div class="about-header">
+      <div class="about-eyebrow">About snapjam</div>
+      <h2 class="about-title">Built for <span class="gradient-text">story lovers</span></h2>
+      <p class="about-sub">We know the feeling — you've got the perfect photo but can't find the right song. snapjam fixes that.</p>
+    </div>
+
+    <div class="about-section">
+      <div class="glass-card about-card">
+        <div class="about-card-title"><span>💡</span> The idea</div>
+        <div class="about-card-body">
+          Finding the right song for an Instagram story takes forever. You scroll through hundreds of tracks, none feel right. We thought — what if AI could just look at your photo and instantly know the vibe? That's snapjam.
+        </div>
+      </div>
+    </div>
+
+    <div class="team-section">
+      <div class="glass-card team-card">
+        <div class="avatar-row">
+          <div class="avatar">🧑‍💻</div>
+          <div class="avatar-info">
+            <div class="name">The snapjam team</div>
+            <div class="role">Builders & music lovers</div>
+          </div>
+        </div>
+        <div class="avatar-bio">
+          We're a small team obsessed with two things: great design and great music. snapjam is our love letter to anyone who takes their Instagram stories seriously.
+        </div>
+      </div>
+    </div>
+
+    <p class="section-title" style="margin-bottom:12px;">Built with</p>
+    <div class="tech-grid">
+      <div class="glass-card tech-card">
+        <div class="tech-icon">🤖</div>
+        <div class="tech-name">Claude AI</div>
+        <div class="tech-desc">Vision AI that reads photo mood & energy</div>
+      </div>
+      <div class="glass-card tech-card">
+        <div class="tech-icon">🌍</div>
+        <div class="tech-name">Global music</div>
+        <div class="tech-desc">Songs from 50+ languages & cultures</div>
+      </div>
+      <div class="glass-card tech-card">
+        <div class="tech-icon">⚡</div>
+        <div class="tech-name">Instant results</div>
+        <div class="tech-desc">No waiting, no signup, no nonsense</div>
+      </div>
+      <div class="glass-card tech-card">
+        <div class="tech-icon">🔒</div>
+        <div class="tech-name">Private</div>
+        <div class="tech-desc">Photos never stored or shared anywhere</div>
+      </div>
+    </div>
+
+    <div class="cta-section">
+      <div class="glass-card cta-card">
+        <div class="cta-title">Ready to find your song?</div>
+        <div class="cta-desc">Upload a photo and let the AI do the magic. Free, forever.</div>
+        <button class="cta-mini-btn" onclick="goTo('app')">Try snapjam ✦</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end app-shell -->
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="goTo('home')">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">Home</span>
+  </button>
+  <button class="nav-btn" id="nav-app" onclick="goTo('app')">
+    <span class="nav-icon">✦</span>
+    <span class="nav-label">Try it</span>
+  </button>
+  <button class="nav-btn" id="nav-about" onclick="goTo('about')">
+    <span class="nav-icon">💜</span>
+    <span class="nav-label">About</span>
+  </button>
+</nav>
+
+<script>
+  /* ─── Navigation ─── */
+  const pages = { home: 'page-landing', app: 'page-app', about: 'page-about' };
+  const navBtns = { home: 'nav-home', app: 'nav-app', about: 'nav-about' };
+  const pageOrder = ['home', 'app', 'about'];
+  let current = 'home';
+
+  function goTo(target) {
+    if (target === current) return;
+    const curIdx = pageOrder.indexOf(current);
+    const tgtIdx = pageOrder.indexOf(target);
+    const goRight = tgtIdx > curIdx;
+
+    const curPage = document.getElementById(pages[current]);
+    const tgtPage = document.getElementById(pages[target]);
+
+    // Prepare target off-screen
+    tgtPage.classList.remove('hidden-left', 'hidden-right', 'active');
+    tgtPage.classList.add(goRight ? 'hidden-right' : 'hidden-left');
+
+    // Force reflow
+    void tgtPage.offsetWidth;
+
+    // Animate both
+    curPage.classList.remove('active');
+    curPage.classList.add(goRight ? 'hidden-left' : 'hidden-right');
+    tgtPage.classList.remove('hidden-left', 'hidden-right');
+    tgtPage.classList.add('active');
+
+    // Nav state
+    document.getElementById(navBtns[current]).classList.remove('active');
+    document.getElementById(navBtns[target]).classList.add('active');
+
+    // Scroll to top
+    tgtPage.scrollTop = 0;
+    current = target;
+  }
+
+  /* ─── App logic ─── */
+  let base64 = null, mediaType = "image/jpeg";
+
+  function handleFile(e) { const f = e.target.files[0]; if (f) loadImg(f); }
+  function handleDragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('drag-over'); }
+  function handleDragLeave() { document.getElementById('uploadZone').classList.remove('drag-over'); }
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('uploadZone').classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) loadImg(f);
+  }
+
+  function loadImg(file) {
+    mediaType = file.type || "image/jpeg";
+    const r = new FileReader();
+    r.onload = (e) => {
+      base64 = e.target.result.split(',')[1];
+      document.getElementById('preview').src = e.target.result;
+      document.getElementById('preview').style.display = 'block';
+      document.getElementById('uploadZone').style.display = 'none';
+      document.getElementById('analyzeBtn').style.display = 'block';
+      document.getElementById('resultsSection').style.display = 'none';
+      document.getElementById('errorMsg').style.display = 'none';
+    };
+    r.readAsDataURL(file);
+  }
+
+  async function analyzePhoto() {
+    if (!base64) return;
+    document.getElementById('analyzeBtn').style.display = 'none';
+    document.getElementById('loadingSection').style.display = 'flex';
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('errorMsg').style.display = 'none';
+
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          system: `You are a global Instagram music expert. Analyze the photo's mood, colors, setting, and energy. Suggest exactly 3 songs that perfectly match as Instagram Story background music. The 3 songs MUST come from 3 different languages — always include at least one non-English song. Choose from languages like Hindi, Malayalam, Tamil, Telugu, Spanish, Korean, Arabic, French, Portuguese, Punjabi, etc. based on what fits the photo vibe best. Only suggest songs that are trending and available in Instagram's music library. Respond ONLY in this exact JSON format, no extra text, no markdown:
+{"songs":[{"title":"Song Title","artist":"Artist Name","language":"Language"},{"title":"Song Title","artist":"Artist Name","language":"Language"},{"title":"Song Title","artist":"Artist Name","language":"Language"}]}`,
+          messages: [{
+            role: "user",
+            content: [
+              { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+              { type: "text", text: "Suggest 3 perfect Instagram story songs from different languages for this photo." }
+            ]
+          }]
+        })
+      });
+
+      const data = await res.json();
+      const text = data.content.map(i => i.text || "").join("");
+      const songs = JSON.parse(text.replace(/```json|```/g, "").trim()).songs;
+
+      const list = document.getElementById('songList');
+      list.innerHTML = '';
+      ['n1','n2','n3'].forEach((nc, i) => {
+        const c = document.createElement('div');
+        c.className = 'song-card';
+        c.innerHTML = `
+          <div class="snum ${nc}">${i + 1}</div>
+          <div class="sinfo">
+            <div class="stitle">${songs[i].title}</div>
+            <div class="sartist">${songs[i].artist}</div>
+          </div>
+          <span class="slang">${songs[i].language}</span>`;
+        list.appendChild(c);
+      });
+
+      document.getElementById('loadingSection').style.display = 'none';
+      document.getElementById('resultsSection').style.display = 'flex';
+
+    } catch (err) {
+      document.getElementById('loadingSection').style.display = 'none';
+      document.getElementById('errorMsg').style.display = 'block';
+      document.getElementById('analyzeBtn').style.display = 'block';
+      document.getElementById('analyzeBtn').textContent = 'Try again →';
+    }
+  }
+
+  function resetApp() {
+    base64 = null;
+    document.getElementById('preview').style.display = 'none';
+    document.getElementById('uploadZone').style.display = 'flex';
+    document.getElementById('analyzeBtn').style.display = 'none';
+    document.getElementById('analyzeBtn').textContent = 'Find my songs →';
+    document.getElementById('analyzeBtn').onclick = analyzePhoto;
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('errorMsg').style.display = 'none';
+    document.getElementById('fileInput').value = '';
+  }
+</script>
+</body>
+</html>
