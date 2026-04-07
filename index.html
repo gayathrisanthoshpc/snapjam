@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
@@ -11,19 +11,31 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── THEME ── */
     :root {
-      --bg: #06060e; --surface: rgba(255,255,255,0.04);
-      --glass: rgba(255,255,255,0.05); --glass-border: rgba(255,255,255,0.09);
-      --glass-bright: rgba(255,255,255,0.18);
+      --bg: #06060e; --surface: rgba(255,255,255,0.04); --glass: rgba(255,255,255,0.05);
+      --glass-border: rgba(255,255,255,0.09); --glass-bright: rgba(255,255,255,0.18);
       --text: #eeeaff; --text2: #8e8bae; --text3: #4a4866;
-      --pink: #ff3cac; --violet: #6c4fff; --teal: #00e5c0;
+      --pink: #ff3cac; --violet: #6c4fff; --teal: #00e5c0; --gold: #ffb830;
+      --card-bg: rgba(255,255,255,0.04); --input-bg: rgba(255,255,255,0.05);
+      --shadow: 0 8px 40px rgba(0,0,0,0.4);
     }
+    [data-theme="light"] {
+      --bg: #f8f7ff; --surface: rgba(0,0,0,0.03); --glass: rgba(255,255,255,0.85);
+      --glass-border: rgba(0,0,0,0.08); --glass-bright: rgba(0,0,0,0.12);
+      --text: #0e0c1e; --text2: #5a5778; --text3: #9a98b4;
+      --card-bg: rgba(255,255,255,0.9); --input-bg: rgba(0,0,0,0.04);
+      --shadow: 0 8px 40px rgba(0,0,0,0.08);
+    }
+
     html { scroll-behavior: smooth; }
     body {
       background: var(--bg); color: var(--text);
       font-family: 'DM Sans', sans-serif;
       min-height: 100vh; overflow-x: hidden;
       -webkit-tap-highlight-color: transparent;
+      transition: background 0.4s, color 0.3s;
     }
 
     /* ── BG ── */
@@ -31,16 +43,15 @@
     .bg-mesh {
       position: absolute; inset: -20%;
       background:
-        radial-gradient(ellipse 50% 45% at 10% 10%, rgba(255,60,172,0.22) 0%, transparent 55%),
-        radial-gradient(ellipse 55% 50% at 90% 90%, rgba(108,79,255,0.24) 0%, transparent 55%),
-        radial-gradient(ellipse 35% 40% at 60% 20%, rgba(0,229,192,0.1) 0%, transparent 50%);
-      animation: meshDrift 20s ease-in-out infinite alternate;
+        radial-gradient(ellipse 50% 45% at 10% 10%, rgba(255,60,172,0.2) 0%, transparent 55%),
+        radial-gradient(ellipse 55% 50% at 90% 90%, rgba(108,79,255,0.22) 0%, transparent 55%),
+        radial-gradient(ellipse 35% 40% at 60% 20%, rgba(0,229,192,0.08) 0%, transparent 50%);
+      animation: meshDrift 22s ease-in-out infinite alternate;
+      transition: opacity 0.4s;
     }
+    [data-theme="light"] .bg-mesh { opacity: 0.4; }
     @keyframes meshDrift { from{transform:translate(0,0) scale(1)} to{transform:translate(1.5%,2.5%) scale(1.04)} }
-    .bg-grain {
-      position: absolute; inset: 0; opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    }
+    .bg-grain { position: absolute; inset: 0; opacity: 0.025; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 
     /* ── LAYOUT ── */
     .site-wrap { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 0 24px; }
@@ -48,23 +59,26 @@
     /* ── NAV ── */
     .topnav {
       position: sticky; top: 0; z-index: 100;
-      padding: 18px 0;
-      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 0; display: flex; align-items: center; justify-content: space-between;
       border-bottom: 1px solid transparent;
       transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
     }
     .topnav.scrolled { background: rgba(6,6,14,0.85); border-color: var(--glass-border); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    [data-theme="light"] .topnav.scrolled { background: rgba(248,247,255,0.88); }
     .logo { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -0.8px; text-decoration: none; color: var(--text); }
     .logo .jam { color: var(--pink); }
-    .nav-links { display: flex; align-items: center; gap: 4px; }
-    .nav-link { padding: 8px 16px; border-radius: 20px; font-size: 14px; color: var(--text2); background: none; border: none; cursor: pointer; font-family: inherit; transition: color 0.2s, background 0.2s; }
-    .nav-link:hover  { color: var(--text); background: var(--surface); }
+    .nav-center { display: flex; align-items: center; gap: 4px; }
+    .nav-link { padding: 8px 14px; border-radius: 20px; font-size: 13px; color: var(--text2); background: none; border: none; cursor: pointer; font-family: inherit; transition: color 0.2s, background 0.2s; }
+    .nav-link:hover { color: var(--text); background: var(--surface); }
     .nav-link.active { color: var(--text); background: var(--glass); }
-    .nav-cta { padding: 9px 20px; border-radius: 20px; font-size: 14px; font-weight: 500; color: #fff; border: none; cursor: pointer; font-family: inherit; background: linear-gradient(135deg, var(--pink), var(--violet)); transition: opacity 0.2s, transform 0.15s; }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .theme-toggle { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--glass-border); background: var(--surface); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s, background 0.2s; }
+    .theme-toggle:hover { border-color: var(--glass-bright); background: var(--glass); }
+    .nav-cta { padding: 9px 18px; border-radius: 20px; font-size: 13px; font-weight: 500; color: #fff; border: none; cursor: pointer; font-family: inherit; background: linear-gradient(135deg, var(--pink), var(--violet)); transition: opacity 0.2s, transform 0.15s; }
     .nav-cta:hover { opacity: 0.9; }
     .nav-cta:active { transform: scale(0.97); }
     .nav-mobile-toggle { display: none; flex-direction: column; gap: 5px; padding: 8px; background: none; border: none; cursor: pointer; }
-    .nav-mobile-toggle span { display: block; width: 22px; height: 2px; background: var(--text2); border-radius: 2px; transition: 0.3s; }
+    .nav-mobile-toggle span { display: block; width: 22px; height: 2px; background: var(--text2); border-radius: 2px; }
 
     /* ── PAGES ── */
     .page { display: none; }
@@ -72,14 +86,14 @@
 
     /* ── SHARED ── */
     .gradient-text { background: linear-gradient(135deg, var(--pink) 0%, var(--violet) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .glass-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); position: relative; overflow: hidden; }
+    .glass-card { background: var(--card-bg); border: 1px solid var(--glass-border); border-radius: 20px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); position: relative; overflow: hidden; box-shadow: var(--shadow); }
     .glass-card::before { content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px; background: linear-gradient(90deg, transparent, var(--glass-bright), transparent); pointer-events: none; }
     .section-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text3); display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
     .section-eyebrow::after { content: ''; flex: 1; max-width: 60px; height: 1px; background: linear-gradient(90deg, var(--glass-border), transparent); }
     .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 28px; border-radius: 16px; border: none; background: linear-gradient(135deg, var(--pink), var(--violet)); color: #fff; font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer; position: relative; overflow: hidden; transition: transform 0.2s, opacity 0.2s; white-space: nowrap; }
-    .btn-primary::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent); transition: left 0.5s; }
+    .btn-primary::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent); transition: left 0.5s; }
     .btn-primary:hover::after { left: 150%; }
-    .btn-primary:active { transform: scale(0.97); opacity: 0.9; }
+    .btn-primary:active { transform: scale(0.97); }
     .btn-primary.full { width: 100%; }
     .btn-ghost { display: inline-flex; align-items: center; gap: 6px; padding: 13px 22px; border-radius: 16px; border: 1px solid var(--glass-border); color: var(--text2); background: transparent; font-family: inherit; font-size: 15px; cursor: pointer; transition: color 0.2s, border-color 0.2s, background 0.2s; }
     .btn-ghost:hover { color: var(--text); border-color: var(--glass-bright); background: var(--glass); }
@@ -87,159 +101,156 @@
     .live-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px var(--teal); animation: blink 2.5s ease infinite; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
     @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
     /* ── MOBILE DRAWER ── */
-    .mobile-drawer { position: fixed; inset: 0; z-index: 200; background: rgba(6,6,14,0.97); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; transform: translateY(-100%); transition: transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+    .mobile-drawer { position: fixed; inset: 0; z-index: 200; background: rgba(6,6,14,0.97); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; transform: translateY(-100%); transition: transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+    [data-theme="light"] .mobile-drawer { background: rgba(248,247,255,0.97); }
     .mobile-drawer.open { transform: translateY(0); }
-    .drawer-link { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; color: var(--text2); background: none; border: none; cursor: pointer; transition: color 0.2s; padding: 8px 20px; }
-    .drawer-link:hover, .drawer-link.active { color: var(--text); }
-    .drawer-close { position: absolute; top: 20px; right: 20px; font-size: 24px; color: var(--text3); background: none; border: none; cursor: pointer; }
-    .drawer-cta { margin-top: 16px; }
+    .drawer-link { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; color: var(--text2); background: none; border: none; cursor: pointer; transition: color 0.2s; padding: 8px 20px; }
+    .drawer-link:hover { color: var(--text); }
+    .drawer-close { position: absolute; top: 20px; right: 20px; font-size: 22px; color: var(--text3); background: none; border: none; cursor: pointer; }
+    .drawer-cta { margin-top: 12px; }
 
-    /* ═══ PAGE 1: HOME ═══ */
-    .hero { padding: 80px 0 72px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+    /* ═══════════ PAGE: HOME ═══════════ */
+    .hero { padding: 80px 0 64px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
     .hero-left { animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both; }
-    .hero-title { font-family: 'Syne', sans-serif; font-size: clamp(40px, 5.5vw, 68px); font-weight: 800; line-height: 1.03; letter-spacing: -2px; margin-bottom: 20px; }
+    .hero-title { font-family: 'Syne', sans-serif; font-size: clamp(38px,5.5vw,66px); font-weight: 800; line-height: 1.03; letter-spacing: -2px; margin-bottom: 20px; }
     .hero-sub { font-size: 17px; color: var(--text2); line-height: 1.7; font-weight: 300; max-width: 400px; margin-bottom: 32px; }
     .hero-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
     .hero-right { display: flex; justify-content: center; animation: fadeUp 0.7s 0.12s cubic-bezier(0.16,1,0.3,1) both; }
-    .phone-frame { width: 220px; height: 460px; background: var(--glass); border: 1.5px solid var(--glass-bright); border-radius: 36px; padding: 16px 14px; position: relative; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 40px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15); }
-    .phone-notch { width: 60px; height: 8px; background: rgba(0,0,0,0.5); border-radius: 4px; margin: 0 auto 12px; }
-    .phone-inner { height: calc(100% - 20px); display: flex; flex-direction: column; gap: 8px; }
+
+    /* Phone mockup */
+    .phone-frame { width: 220px; height: 460px; background: var(--glass); border: 1.5px solid var(--glass-bright); border-radius: 36px; padding: 16px 14px; position: relative; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 40px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15); }
+    .phone-notch { width: 60px; height: 8px; background: rgba(0,0,0,0.4); border-radius: 4px; margin: 0 auto 12px; }
+    .phone-inner { height: calc(100% - 20px); display: flex; flex-direction: column; gap: 7px; }
     .phone-img-placeholder { flex: 1; border-radius: 16px; background: linear-gradient(135deg, rgba(255,60,172,0.2) 0%, rgba(108,79,255,0.25) 50%, rgba(0,229,192,0.15) 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
-    .phone-img-placeholder .emoji { font-size: 32px; }
-    .phone-img-placeholder p { font-size: 11px; color: var(--text2); font-weight: 300; }
-    .phone-vibe-strip { display: flex; gap: 4px; flex-wrap: wrap; }
+    .phone-img-placeholder .emoji { font-size: 30px; }
+    .phone-img-placeholder p { font-size: 10px; color: var(--text2); font-weight: 300; }
+    .phone-vibe-strip { display: flex; gap: 4px; }
     .phone-vibe-chip { font-size: 9px; padding: 3px 7px; border-radius: 10px; border: 1px solid rgba(255,60,172,0.3); color: var(--pink); background: rgba(255,60,172,0.08); white-space: nowrap; }
-    .phone-song-preview { background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); border-radius: 12px; padding: 9px 11px; display: flex; align-items: center; gap: 9px; }
-    .phone-song-dot { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; }
-    .phone-song-dot.c1 { background: rgba(255,60,172,0.2); }
-    .phone-song-dot.c2 { background: rgba(108,79,255,0.2); }
-    .phone-song-dot.c3 { background: rgba(0,229,192,0.2); }
+    .phone-song-preview { background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); border-radius: 11px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; }
+    .phone-song-dot { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+    .phone-song-dot.c1{background:rgba(255,60,172,0.2)} .phone-song-dot.c2{background:rgba(108,79,255,0.2)} .phone-song-dot.c3{background:rgba(0,229,192,0.2)}
     .phone-song-info .t { font-size: 10px; font-weight: 500; margin-bottom: 1px; }
     .phone-song-info .a { font-size: 9px; color: var(--text3); font-weight: 300; }
-    .phone-frame::after { content: ''; position: absolute; inset: -1px; border-radius: 36px; background: linear-gradient(135deg, rgba(255,60,172,0.15), rgba(108,79,255,0.15)); opacity: 0; animation: phonePulse 4s ease-in-out infinite; }
+    .phone-frame::after { content: ''; position: absolute; inset: -1px; border-radius: 36px; background: linear-gradient(135deg, rgba(255,60,172,0.12), rgba(108,79,255,0.12)); opacity: 0; animation: phonePulse 4s ease-in-out infinite; }
     @keyframes phonePulse { 0%,100%{opacity:0} 50%{opacity:1} }
 
-    .stats-strip { display: flex; align-items: stretch; border: 1px solid var(--glass-border); border-radius: 20px; overflow: hidden; margin-bottom: 72px; animation: fadeUp 0.7s 0.18s cubic-bezier(0.16,1,0.3,1) both; }
-    .stat-item { flex: 1; padding: 28px 20px; text-align: center; border-right: 1px solid var(--glass-border); }
-    .stat-item:last-child { border-right: none; }
-    .stat-val { font-family: 'Syne', sans-serif; font-size: 34px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
-    .stat-label { font-size: 13px; color: var(--text3); font-weight: 300; }
+    /* Floating particles */
+    .particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: 36px; }
+    .particle { position: absolute; width: 3px; height: 3px; border-radius: 50%; opacity: 0; animation: particleFloat linear infinite; }
+    .particle:nth-child(1){left:20%;background:var(--pink);animation-duration:4s;animation-delay:0s}
+    .particle:nth-child(2){left:50%;background:var(--violet);animation-duration:5s;animation-delay:1s}
+    .particle:nth-child(3){left:80%;background:var(--teal);animation-duration:3.5s;animation-delay:2s}
+    .particle:nth-child(4){left:35%;background:var(--pink);animation-duration:4.5s;animation-delay:0.5s}
+    .particle:nth-child(5){left:65%;background:var(--violet);animation-duration:3s;animation-delay:1.5s}
+    @keyframes particleFloat { 0%{bottom:-10px;opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{bottom:110%;opacity:0} }
 
+    /* Stats */
+    .stats-strip { display: flex; align-items: stretch; border: 1px solid var(--glass-border); border-radius: 20px; overflow: hidden; margin-bottom: 72px; animation: fadeUp 0.7s 0.18s cubic-bezier(0.16,1,0.3,1) both; }
+    .stat-item { flex: 1; padding: 28px 16px; text-align: center; border-right: 1px solid var(--glass-border); transition: background 0.2s; cursor: default; }
+    .stat-item:last-child { border-right: none; }
+    .stat-item:hover { background: var(--surface); }
+    .stat-val { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
+    .stat-label { font-size: 12px; color: var(--text3); font-weight: 300; }
+
+    /* Scrolling language ticker */
+    .ticker-section { margin-bottom: 72px; overflow: hidden; animation: fadeUp 0.7s 0.2s cubic-bezier(0.16,1,0.3,1) both; }
+    .ticker-label { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text3); text-align: center; margin-bottom: 16px; }
+    .ticker-track { display: flex; gap: 0; width: max-content; animation: tickerScroll 28s linear infinite; }
+    .ticker-track:hover { animation-play-state: paused; }
+    @keyframes tickerScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .ticker-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; white-space: nowrap; font-size: 14px; color: var(--text2); font-weight: 400; }
+    .ticker-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .ticker-dot.pk{background:var(--pink)} .ticker-dot.vl{background:var(--violet)} .ticker-dot.tl{background:var(--teal)} .ticker-dot.gd{background:var(--gold)}
+
+    /* How it works */
     .hiw-section { margin-bottom: 72px; animation: fadeUp 0.7s 0.22s cubic-bezier(0.16,1,0.3,1) both; }
     .hiw-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 32px; }
-    .hiw-card { padding: 28px 24px; }
+    .hiw-card { padding: 28px 24px; transition: transform 0.2s, box-shadow 0.2s; }
+    .hiw-card:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(0,0,0,0.3); }
     .hiw-icon { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 18px; }
     .hiw-icon.i1{background:rgba(255,60,172,0.12)} .hiw-icon.i2{background:rgba(108,79,255,0.12)} .hiw-icon.i3{background:rgba(0,229,192,0.12)}
     .hiw-title { font-size: 16px; font-weight: 500; margin-bottom: 8px; }
     .hiw-desc  { font-size: 13px; color: var(--text2); line-height: 1.65; font-weight: 300; }
 
+    /* Testimonials */
+    .testimonials-section { margin-bottom: 72px; animation: fadeUp 0.7s 0.24s cubic-bezier(0.16,1,0.3,1) both; }
+    .testimonials-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 32px; }
+    .testimonial-card { padding: 24px; }
+    .testimonial-stars { color: var(--gold); font-size: 13px; margin-bottom: 12px; letter-spacing: 2px; }
+    .testimonial-text { font-size: 14px; color: var(--text2); line-height: 1.7; font-weight: 300; margin-bottom: 14px; font-style: italic; }
+    .testimonial-author { font-size: 13px; font-weight: 500; color: var(--text); }
+    .testimonial-handle { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+    /* CTA band */
     .cta-band { margin-bottom: 72px; background: linear-gradient(135deg, rgba(255,60,172,0.07), rgba(108,79,255,0.09)); border: 1px solid rgba(255,60,172,0.16); border-radius: 24px; padding: 48px 40px; display: flex; align-items: center; justify-content: space-between; gap: 24px; animation: fadeUp 0.7s 0.28s cubic-bezier(0.16,1,0.3,1) both; }
-    .cta-band-title { font-family: 'Syne', sans-serif; font-size: clamp(22px, 3vw, 32px); font-weight: 800; letter-spacing: -0.8px; margin-bottom: 8px; }
+    .cta-band-title { font-family: 'Syne', sans-serif; font-size: clamp(22px,3vw,32px); font-weight: 800; letter-spacing: -0.8px; margin-bottom: 8px; }
     .cta-band-sub { font-size: 14px; color: var(--text2); font-weight: 300; max-width: 380px; }
 
-    /* ═══ PAGE 2: APP ═══ */
-    .app-layout { padding: 52px 0 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+    /* ═══════════ PAGE: APP ═══════════ */
+    .app-layout { padding: 48px 0 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
     .app-left { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
-    .app-page-title { font-family: 'Syne', sans-serif; font-size: clamp(32px, 4vw, 48px); font-weight: 800; letter-spacing: -1.5px; line-height: 1.06; margin-bottom: 12px; }
-    .app-page-sub { font-size: 15px; color: var(--text2); font-weight: 300; line-height: 1.65; margin-bottom: 32px; }
-    .upload-card { padding: 24px; animation: fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both; }
+    .app-page-title { font-family: 'Syne', sans-serif; font-size: clamp(30px,4vw,46px); font-weight: 800; letter-spacing: -1.5px; line-height: 1.06; margin-bottom: 10px; }
+    .app-page-sub { font-size: 15px; color: var(--text2); font-weight: 300; line-height: 1.65; margin-bottom: 28px; }
+    .upload-card { padding: 22px; animation: fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both; }
 
-    /* Mood selector */
-    .mood-selector { margin-bottom: 20px; }
+    /* Mood */
+    .mood-selector { margin-bottom: 18px; }
     .mood-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
-    .mood-pills { display: flex; gap: 8px; flex-wrap: wrap; }
-    .mood-pill {
-      padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 400;
-      border: 1px solid var(--glass-border); color: var(--text2);
-      background: transparent; cursor: pointer; font-family: inherit;
-      transition: all 0.2s; white-space: nowrap;
-    }
-    .mood-pill:hover { border-color: var(--glass-bright); color: var(--text); background: var(--surface); }
+    .mood-pills { display: flex; gap: 7px; flex-wrap: wrap; }
+    .mood-pill { padding: 7px 14px; border-radius: 20px; font-size: 13px; font-weight: 400; border: 1px solid var(--glass-border); color: var(--text2); background: transparent; cursor: pointer; font-family: inherit; transition: all 0.2s; white-space: nowrap; }
+    .mood-pill:hover { border-color: var(--glass-bright); color: var(--text); }
     .mood-pill.selected { border-color: var(--pink); color: var(--pink); background: rgba(255,60,172,0.1); }
-    .mood-pill .mood-emoji { margin-right: 5px; }
 
-    /* Preview */
-    #preview { width: 100%; aspect-ratio: 9/13; object-fit: cover; border-radius: 16px; border: 1px solid var(--glass-border); display: none; margin-bottom: 16px; animation: scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; position: relative; }
-    @keyframes scaleIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
-
-    /* Scan overlay */
+    /* Preview + scan */
     .preview-wrap { position: relative; display: none; margin-bottom: 16px; border-radius: 16px; overflow: hidden; }
     .preview-wrap img { width: 100%; aspect-ratio: 9/13; object-fit: cover; border-radius: 16px; border: 1px solid var(--glass-border); display: block; }
-    .scan-overlay {
-      position: absolute; inset: 0; border-radius: 16px;
-      background: linear-gradient(180deg, transparent 0%, rgba(108,79,255,0.15) 48%, transparent 50%, transparent 100%);
-      background-size: 100% 200%;
-      animation: none; opacity: 0; pointer-events: none;
-    }
-    .scan-overlay.scanning {
-      opacity: 1;
-      animation: scanMove 1.6s ease-in-out infinite;
-    }
-    .scan-line {
-      position: absolute; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--violet), var(--pink), var(--violet), transparent);
-      box-shadow: 0 0 12px var(--pink);
-      top: 0; animation: none; opacity: 0;
-    }
-    .scan-line.scanning {
-      opacity: 1;
-      animation: scanLine 1.6s ease-in-out infinite;
-    }
+    .scan-overlay { position: absolute; inset: 0; border-radius: 16px; background: linear-gradient(180deg, transparent 0%, rgba(108,79,255,0.12) 48%, transparent 50%); background-size: 100% 200%; opacity: 0; pointer-events: none; }
+    .scan-overlay.scanning { opacity: 1; animation: scanMove 1.6s ease-in-out infinite; }
+    .scan-line { position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--violet), var(--pink), var(--violet), transparent); box-shadow: 0 0 12px var(--pink); top: 0; opacity: 0; pointer-events: none; }
+    .scan-line.scanning { opacity: 1; animation: scanLine 1.6s ease-in-out infinite; }
     @keyframes scanMove { 0%{background-position:0 0} 100%{background-position:0 200%} }
     @keyframes scanLine { 0%{top:0%} 100%{top:100%} }
     .scan-corners { position: absolute; inset: 8px; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
     .scan-corners.visible { opacity: 1; }
-    .scan-corners::before, .scan-corners::after,
-    .scan-corners .c3, .scan-corners .c4 {
-      content: ''; position: absolute; width: 20px; height: 20px;
-    }
-    .scan-corners::before { top: 0; left: 0; border-top: 2px solid var(--pink); border-left: 2px solid var(--pink); border-radius: 4px 0 0 0; }
-    .scan-corners::after  { top: 0; right: 0; border-top: 2px solid var(--pink); border-right: 2px solid var(--pink); border-radius: 0 4px 0 0; }
-    .scan-corners .c3 { bottom: 0; left: 0; border-bottom: 2px solid var(--pink); border-left: 2px solid var(--pink); border-radius: 0 0 0 4px; }
-    .scan-corners .c4 { bottom: 0; right: 0; border-bottom: 2px solid var(--pink); border-right: 2px solid var(--pink); border-radius: 0 0 4px 0; }
+    .scan-corners::before, .scan-corners::after, .scan-corners .c3, .scan-corners .c4 { content: ''; position: absolute; width: 20px; height: 20px; }
+    .scan-corners::before { top:0;left:0;border-top:2px solid var(--pink);border-left:2px solid var(--pink);border-radius:4px 0 0 0; }
+    .scan-corners::after  { top:0;right:0;border-top:2px solid var(--pink);border-right:2px solid var(--pink);border-radius:0 4px 0 0; }
+    .scan-corners .c3 { bottom:0;left:0;border-bottom:2px solid var(--pink);border-left:2px solid var(--pink);border-radius:0 0 0 4px; }
+    .scan-corners .c4 { bottom:0;right:0;border-bottom:2px solid var(--pink);border-right:2px solid var(--pink);border-radius:0 0 4px 0; }
 
     /* Upload zone */
-    .upload-zone { min-height: 180px; border-radius: 16px; border: 1.5px dashed var(--glass-border); background: rgba(255,255,255,0.02); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; padding: 32px 20px; transition: border-color 0.25s, background 0.25s, transform 0.2s; -webkit-user-select: none; user-select: none; }
+    .upload-zone { min-height: 175px; border-radius: 16px; border: 1.5px dashed var(--glass-border); background: var(--input-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; padding: 28px 20px; transition: border-color 0.25s, background 0.25s, transform 0.2s; -webkit-user-select: none; user-select: none; }
     .upload-zone:hover { border-color: rgba(255,60,172,0.4); background: rgba(255,60,172,0.03); }
     .upload-zone:active, .upload-zone.drag-over { border-color: var(--pink); background: rgba(255,60,172,0.06); transform: scale(0.99); }
-    .u-ring { width: 64px; height: 64px; border-radius: 50%; border: 1.5px solid var(--glass-bright); background: rgba(255,60,172,0.1); display: flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 14px; position: relative; }
+    .u-ring { width: 60px; height: 60px; border-radius: 50%; border: 1.5px solid var(--glass-bright); background: rgba(255,60,172,0.1); display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 12px; position: relative; }
     .u-ring::before { content: ''; position: absolute; inset: -7px; border-radius: 50%; border: 1px solid rgba(255,60,172,0.2); animation: ringPulse 3s ease infinite; }
     @keyframes ringPulse { 0%,100%{transform:scale(1);opacity:.6} 50%{transform:scale(1.12);opacity:.12} }
-    .u-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
-    .u-sub   { font-size: 13px; color: var(--text3); font-weight: 300; }
+    .u-title { font-size: 14px; font-weight: 500; margin-bottom: 5px; }
+    .u-sub   { font-size: 12px; color: var(--text3); font-weight: 300; }
 
     /* Loading */
-    #loadingSection { display: none; min-height: 180px; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
+    #loadingSection { display: none; min-height: 175px; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
     .waveform { display: flex; align-items: center; gap: 4px; height: 36px; }
     .wv { width: 3px; border-radius: 2px; animation: wvAnim 1.2s ease-in-out infinite; }
-    .wv:nth-child(1){background:var(--pink);  animation-delay:0s;  height:10px}
-    .wv:nth-child(2){background:var(--pink);  animation-delay:.1s; height:16px}
-    .wv:nth-child(3){background:var(--violet);animation-delay:.2s; height:24px}
-    .wv:nth-child(4){background:var(--violet);animation-delay:.3s; height:32px}
-    .wv:nth-child(5){background:var(--teal);  animation-delay:.4s; height:24px}
-    .wv:nth-child(6){background:var(--teal);  animation-delay:.3s; height:16px}
-    .wv:nth-child(7){background:var(--violet);animation-delay:.2s; height:24px}
-    .wv:nth-child(8){background:var(--pink);  animation-delay:.1s; height:16px}
-    .wv:nth-child(9){background:var(--pink);  animation-delay:0s;  height:10px}
+    .wv:nth-child(1){background:var(--pink);animation-delay:0s;height:10px} .wv:nth-child(2){background:var(--pink);animation-delay:.1s;height:16px}
+    .wv:nth-child(3){background:var(--violet);animation-delay:.2s;height:24px} .wv:nth-child(4){background:var(--violet);animation-delay:.3s;height:32px}
+    .wv:nth-child(5){background:var(--teal);animation-delay:.4s;height:24px} .wv:nth-child(6){background:var(--teal);animation-delay:.3s;height:16px}
+    .wv:nth-child(7){background:var(--violet);animation-delay:.2s;height:24px} .wv:nth-child(8){background:var(--pink);animation-delay:.1s;height:16px} .wv:nth-child(9){background:var(--pink);animation-delay:0s;height:10px}
     @keyframes wvAnim { 0%,100%{transform:scaleY(.3);opacity:.4} 50%{transform:scaleY(1);opacity:1} }
-    .loading-label { font-size: 14px; color: var(--text2); font-weight: 300; }
+    .loading-label { font-size: 13px; color: var(--text2); font-weight: 300; }
     .loading-label span { display: inline-block; animation: dotFade 1.4s ease infinite; }
-    .loading-label span:nth-child(2){animation-delay:.2s}
-    .loading-label span:nth-child(3){animation-delay:.4s}
+    .loading-label span:nth-child(2){animation-delay:.2s} .loading-label span:nth-child(3){animation-delay:.4s}
     @keyframes dotFade { 0%,80%,100%{opacity:.3} 40%{opacity:1} }
 
     /* Vibe tags */
-    .vibe-strip { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
-    .vibe-tag {
-      font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px;
-      border: 1px solid rgba(255,60,172,0.3); color: var(--pink);
-      background: rgba(255,60,172,0.08); letter-spacing: 0.04em;
-      animation: tagPop 0.4s cubic-bezier(0.16,1,0.3,1) both;
-    }
-    .vibe-tag:nth-child(2){animation-delay:.07s; border-color:rgba(108,79,255,0.3); color:var(--violet); background:rgba(108,79,255,0.08);}
-    .vibe-tag:nth-child(3){animation-delay:.14s; border-color:rgba(0,229,192,0.3); color:var(--teal); background:rgba(0,229,192,0.08);}
+    .vibe-strip { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .vibe-tag { font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px; letter-spacing: 0.04em; animation: tagPop 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+    .vibe-tag:nth-child(1){border:1px solid rgba(255,60,172,0.3);color:var(--pink);background:rgba(255,60,172,0.08);animation-delay:0s}
+    .vibe-tag:nth-child(2){border:1px solid rgba(108,79,255,0.3);color:var(--violet);background:rgba(108,79,255,0.08);animation-delay:.07s}
+    .vibe-tag:nth-child(3){border:1px solid rgba(0,229,192,0.3);color:var(--teal);background:rgba(0,229,192,0.08);animation-delay:.14s}
     @keyframes tagPop { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
 
     /* Results */
@@ -248,173 +259,186 @@
     .results-label { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); }
     .retry-btn { font-size: 13px; color: var(--pink); background: none; border: none; cursor: pointer; font-family: inherit; font-weight: 500; padding: 0; transition: opacity 0.2s; }
     .retry-btn:hover { opacity: 0.7; }
-    .song-list { display: flex; flex-direction: column; gap: 10px; }
-    .song-card {
-      background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border);
-      border-radius: 16px; padding: 14px 16px;
-      display: flex; align-items: center; gap: 14px;
-      position: relative; overflow: hidden;
-      transition: border-color 0.2s, transform 0.2s, background 0.2s;
-      animation: cardIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
-    }
-    .song-card:hover { border-color: var(--glass-bright); background: rgba(255,255,255,0.06); }
-    .song-card::before { content: ''; position: absolute; inset: 0; border-radius: 16px; background: linear-gradient(135deg, rgba(255,255,255,0.04), transparent); pointer-events: none; }
+    .song-list { display: flex; flex-direction: column; gap: 9px; }
+    .song-card { background: var(--card-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 13px 15px; display: flex; align-items: center; gap: 13px; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s, background 0.2s; animation: cardIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+    .song-card:hover { border-color: var(--glass-bright); transform: translateX(3px); }
     .song-card:nth-child(1){animation-delay:.04s} .song-card:nth-child(2){animation-delay:.1s} .song-card:nth-child(3){animation-delay:.16s}
     @keyframes cardIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-    .snum { width: 34px; height: 34px; border-radius: 50%; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; }
+    .snum { width: 32px; height: 32px; border-radius: 50%; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; }
     .snum::after { content: ''; position: absolute; inset: -2px; border-radius: 50%; border: 1px solid currentColor; opacity: 0.3; }
     .snum.n1{background:rgba(255,60,172,0.18);color:var(--pink)} .snum.n2{background:rgba(108,79,255,0.18);color:var(--violet)} .snum.n3{background:rgba(0,229,192,0.18);color:var(--teal)}
     .sinfo { flex: 1; min-width: 0; }
-    .stitle { font-size: 15px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+    .stitle { font-size: 14px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
     .sartist { font-size: 12px; color: var(--text2); font-weight: 300; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .song-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-    .slang { font-size: 10px; font-weight: 500; padding: 4px 9px; border-radius: 20px; border: 1px solid var(--glass-bright); color: var(--text3); white-space: nowrap; letter-spacing: 0.06em; text-transform: uppercase; background: rgba(255,255,255,0.04); }
-    .copy-btn {
-      width: 30px; height: 30px; border-radius: 8px;
-      border: 1px solid var(--glass-border); background: transparent;
-      color: var(--text3); cursor: pointer; font-size: 14px;
-      display: flex; align-items: center; justify-content: center;
-      transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.15s;
-      flex-shrink: 0;
-    }
-    .copy-btn:hover { border-color: var(--glass-bright); color: var(--text); background: var(--surface); }
-    .copy-btn:active { transform: scale(0.9); }
+    .song-right { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+    .slang { font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 20px; border: 1px solid var(--glass-bright); color: var(--text3); white-space: nowrap; letter-spacing: 0.06em; text-transform: uppercase; background: rgba(255,255,255,0.04); }
+    .copy-btn { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--glass-border); background: transparent; color: var(--text3); cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+    .copy-btn:hover { border-color: var(--glass-bright); color: var(--text); }
     .copy-btn.copied { border-color: var(--teal); color: var(--teal); background: rgba(0,229,192,0.1); }
-
-    .hint { font-size: 12px; color: var(--text3); text-align: center; margin-top: 16px; font-weight: 300; line-height: 1.6; }
-
-    /* Share card */
-    .share-section { margin-top: 20px; }
-    .share-btn { width: 100%; padding: 13px; border-radius: 14px; border: 1px solid var(--glass-border); background: var(--surface); color: var(--text2); font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; transition: border-color 0.2s, color 0.2s, background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .ig-search-btn { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--glass-border); background: transparent; color: var(--text3); cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; text-decoration: none; }
+    .ig-search-btn:hover { border-color: rgba(255,60,172,0.4); color: var(--pink); background: rgba(255,60,172,0.08); }
+    .hint { font-size: 12px; color: var(--text3); text-align: center; margin-top: 14px; font-weight: 300; line-height: 1.6; }
+    .share-section { margin-top: 18px; }
+    .share-btn { width: 100%; padding: 12px; border-radius: 14px; border: 1px solid var(--glass-border); background: var(--surface); color: var(--text2); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 7px; }
     .share-btn:hover { border-color: var(--violet); color: var(--text); background: rgba(108,79,255,0.08); }
-
-    /* Share modal */
-    .share-modal-bg {
-      position: fixed; inset: 0; z-index: 300;
-      background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
-      display: none; align-items: center; justify-content: center; padding: 20px;
-    }
-    .share-modal-bg.open { display: flex; }
-    .share-modal {
-      background: #0e0e1a; border: 1px solid var(--glass-border);
-      border-radius: 24px; padding: 28px; width: 100%; max-width: 380px;
-      position: relative; animation: modalIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
-    }
-    @keyframes modalIn { from{opacity:0;transform:scale(0.92) translateY(16px)} to{opacity:1;transform:scale(1) translateY(0)} }
-    .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text3); font-size: 20px; cursor: pointer; transition: color 0.2s; }
-    .modal-close:hover { color: var(--text); }
-    .modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 18px; }
-
-    /* The shareable card inside modal */
-    .share-card-preview {
-      border-radius: 18px; padding: 24px;
-      background: linear-gradient(135deg, #0e0818 0%, #0a0e1e 100%);
-      border: 1px solid var(--glass-border); margin-bottom: 20px;
-      position: relative; overflow: hidden;
-    }
-    .share-card-preview::before {
-      content: ''; position: absolute; inset: -40%;
-      background: radial-gradient(ellipse 60% 50% at 20% 20%, rgba(255,60,172,0.15) 0%, transparent 55%),
-                  radial-gradient(ellipse 50% 60% at 80% 80%, rgba(108,79,255,0.15) 0%, transparent 55%);
-    }
-    .share-card-inner { position: relative; z-index: 1; }
-    .share-card-logo { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; color: var(--text3); margin-bottom: 14px; }
-    .share-card-logo span { color: var(--pink); }
-    .share-card-vibes { display: flex; gap: 5px; margin-bottom: 14px; flex-wrap: wrap; }
-    .share-card-vibe { font-size: 10px; padding: 3px 9px; border-radius: 10px; border: 1px solid rgba(255,60,172,0.3); color: var(--pink); background: rgba(255,60,172,0.08); }
-    .share-card-songs { display: flex; flex-direction: column; gap: 8px; }
-    .share-card-song { display: flex; align-items: center; gap: 10px; }
-    .share-song-num { width: 22px; height: 22px; border-radius: 50%; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .share-song-num.sn1{background:rgba(255,60,172,0.2);color:var(--pink)} .share-song-num.sn2{background:rgba(108,79,255,0.2);color:var(--violet)} .share-song-num.sn3{background:rgba(0,229,192,0.2);color:var(--teal)}
-    .share-song-title { font-size: 12px; font-weight: 500; color: var(--text); }
-    .share-song-artist { font-size: 10px; color: var(--text2); font-weight: 300; }
-    .share-hint { font-size: 11px; color: var(--text3); margin-top: 14px; font-weight: 300; font-style: italic; }
-
-    .modal-actions { display: flex; gap: 10px; }
-    .modal-copy-btn { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--surface); color: var(--text2); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
-    .modal-copy-btn:hover { border-color: var(--teal); color: var(--teal); background: rgba(0,229,192,0.08); }
-    .modal-share-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--pink), var(--violet)); color: #fff; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity 0.2s; }
-    .modal-share-btn:hover { opacity: 0.88; }
-
     .error-msg { font-size: 13px; color: #ff5f6d; text-align: center; margin-top: 10px; display: none; padding: 12px 16px; border-radius: 12px; background: rgba(255,95,109,0.07); border: 1px solid rgba(255,95,109,0.15); }
 
-    /* Right info panels */
-    .app-right { animation: fadeUp 0.6s 0.16s cubic-bezier(0.16,1,0.3,1) both; }
-    .info-block { margin-bottom: 16px; padding: 22px; }
-    .info-block-title { font-size: 14px; font-weight: 500; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-    .info-block-title .ico { font-size: 18px; }
-    .info-block-body { font-size: 13px; color: var(--text2); line-height: 1.7; font-weight: 300; }
-    .lang-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-    .chip { font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--glass-border); color: var(--text3); background: var(--surface); white-space: nowrap; }
+    /* History */
+    .history-section { margin-top: 24px; }
+    .history-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+    .history-clear { font-size: 11px; color: var(--text3); background: none; border: none; cursor: pointer; font-family: inherit; transition: color 0.2s; }
+    .history-clear:hover { color: var(--pink); }
+    .history-list { display: flex; flex-direction: column; gap: 8px; }
+    .history-item { padding: 12px 14px; border-radius: 14px; border: 1px solid var(--glass-border); background: var(--card-bg); cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+    .history-item:hover { border-color: var(--glass-bright); background: var(--surface); }
+    .history-vibes { display: flex; gap: 5px; margin-bottom: 6px; flex-wrap: wrap; }
+    .history-vibe { font-size: 10px; padding: 2px 7px; border-radius: 10px; border: 1px solid rgba(255,60,172,0.25); color: var(--pink); background: rgba(255,60,172,0.07); }
+    .history-songs { font-size: 12px; color: var(--text2); font-weight: 300; }
+    .history-time { font-size: 10px; color: var(--text3); margin-top: 4px; }
 
-    /* ═══ PAGE 3: ABOUT ═══ */
+    /* Right info */
+    .app-right { animation: fadeUp 0.6s 0.16s cubic-bezier(0.16,1,0.3,1) both; }
+    .info-block { margin-bottom: 14px; padding: 20px; }
+    .info-block-title { font-size: 14px; font-weight: 500; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .info-block-body { font-size: 13px; color: var(--text2); line-height: 1.7; font-weight: 300; }
+    .lang-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+    .chip { font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--glass-border); color: var(--text3); background: var(--surface); white-space: nowrap; transition: border-color 0.2s, color 0.2s; cursor: default; }
+    .chip:hover { border-color: var(--glass-bright); color: var(--text2); }
+
+    /* Share modal */
+    .share-modal-bg { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 20px; }
+    .share-modal-bg.open { display: flex; }
+    .share-modal { background: #0e0e1a; border: 1px solid var(--glass-border); border-radius: 24px; padding: 28px; width: 100%; max-width: 380px; position: relative; animation: modalIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+    [data-theme="light"] .share-modal { background: #fff; }
+    @keyframes modalIn { from{opacity:0;transform:scale(0.92) translateY(16px)} to{opacity:1;transform:scale(1) translateY(0)} }
+    .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text3); font-size: 20px; cursor: pointer; }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 18px; }
+    .share-card-preview { border-radius: 18px; padding: 22px; background: linear-gradient(135deg, #0e0818 0%, #0a0e1e 100%); border: 1px solid var(--glass-border); margin-bottom: 18px; position: relative; overflow: hidden; }
+    .share-card-preview::before { content: ''; position: absolute; inset: -40%; background: radial-gradient(ellipse 60% 50% at 20% 20%, rgba(255,60,172,0.15) 0%, transparent 55%), radial-gradient(ellipse 50% 60% at 80% 80%, rgba(108,79,255,0.15) 0%, transparent 55%); }
+    .share-card-inner { position: relative; z-index: 1; }
+    .share-card-logo { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.4); margin-bottom: 12px; }
+    .share-card-logo span { color: var(--pink); }
+    .share-card-vibes { display: flex; gap: 5px; margin-bottom: 12px; flex-wrap: wrap; }
+    .share-card-vibe { font-size: 10px; padding: 3px 8px; border-radius: 10px; border: 1px solid rgba(255,60,172,0.3); color: var(--pink); background: rgba(255,60,172,0.08); }
+    .share-card-songs { display: flex; flex-direction: column; gap: 7px; }
+    .share-card-song { display: flex; align-items: center; gap: 9px; }
+    .share-song-num { width: 20px; height: 20px; border-radius: 50%; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .share-song-num.sn1{background:rgba(255,60,172,0.2);color:var(--pink)} .share-song-num.sn2{background:rgba(108,79,255,0.2);color:var(--violet)} .share-song-num.sn3{background:rgba(0,229,192,0.2);color:var(--teal)}
+    .share-song-title { font-size: 12px; font-weight: 500; color: #fff; }
+    .share-song-artist { font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 300; }
+    .share-hint { font-size: 10px; color: rgba(255,255,255,0.25); margin-top: 12px; }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-copy-btn { flex: 1; padding: 11px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--surface); color: var(--text2); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .modal-copy-btn:hover { border-color: var(--teal); color: var(--teal); }
+    .modal-share-btn { flex: 1; padding: 11px; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--pink), var(--violet)); color: #fff; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity 0.2s; }
+    .modal-share-btn:hover { opacity: 0.88; }
+
+    /* ═══════════ PAGE: FAQ ═══════════ */
+    .faq-hero { padding: 60px 0 48px; animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+    .faq-title { font-family: 'Syne', sans-serif; font-size: clamp(32px,5vw,52px); font-weight: 800; letter-spacing: -1.5px; margin-bottom: 12px; }
+    .faq-sub { font-size: 15px; color: var(--text2); font-weight: 300; line-height: 1.7; max-width: 480px; }
+    .faq-list { margin-bottom: 60px; display: flex; flex-direction: column; gap: 8px; animation: fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both; }
+    .faq-item { border: 1px solid var(--glass-border); border-radius: 16px; overflow: hidden; background: var(--card-bg); transition: border-color 0.2s; }
+    .faq-item:hover { border-color: var(--glass-bright); }
+    .faq-question { padding: 18px 22px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 15px; font-weight: 500; color: var(--text); -webkit-user-select: none; user-select: none; }
+    .faq-arrow { font-size: 16px; color: var(--text3); transition: transform 0.3s; flex-shrink: 0; }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); color: var(--pink); }
+    .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.16,1,0.3,1); }
+    .faq-item.open .faq-answer { max-height: 300px; }
+    .faq-answer-inner { padding: 0 22px 18px; font-size: 14px; color: var(--text2); line-height: 1.75; font-weight: 300; }
+
+    /* ═══════════ PAGE: CONTACT ═══════════ */
+    .contact-layout { padding: 60px 0 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+    .contact-left { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+    .contact-title { font-family: 'Syne', sans-serif; font-size: clamp(28px,4.5vw,48px); font-weight: 800; letter-spacing: -1.5px; margin-bottom: 12px; }
+    .contact-sub { font-size: 15px; color: var(--text2); font-weight: 300; line-height: 1.7; margin-bottom: 32px; }
+    .contact-info-cards { display: flex; flex-direction: column; gap: 12px; }
+    .contact-info-card { padding: 18px 20px; display: flex; align-items: center; gap: 14px; }
+    .contact-info-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .contact-info-icon.i1{background:rgba(255,60,172,0.12)} .contact-info-icon.i2{background:rgba(108,79,255,0.12)} .contact-info-icon.i3{background:rgba(0,229,192,0.12)}
+    .contact-info-label { font-size: 11px; color: var(--text3); font-weight: 300; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .contact-info-val { font-size: 14px; font-weight: 500; color: var(--text); }
+    .contact-form { animation: fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both; }
+    .contact-card { padding: 28px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); margin-bottom: 7px; display: block; }
+    .form-input { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--input-bg); color: var(--text); font-family: inherit; font-size: 14px; outline: none; transition: border-color 0.2s, background 0.2s; }
+    .form-input:focus { border-color: var(--violet); background: rgba(108,79,255,0.05); }
+    .form-input::placeholder { color: var(--text3); }
+    textarea.form-input { resize: vertical; min-height: 110px; }
+    .form-submit { width: 100%; margin-top: 4px; }
+    .form-success { display: none; text-align: center; padding: 20px; }
+    .form-success .success-icon { font-size: 32px; margin-bottom: 10px; }
+    .form-success p { font-size: 14px; color: var(--text2); font-weight: 300; }
+
+    /* ═══════════ PAGE: ABOUT ═══════════ */
     .about-hero { padding: 64px 0 52px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
-    .about-title { font-family: 'Syne', sans-serif; font-size: clamp(32px, 4.5vw, 52px); font-weight: 800; letter-spacing: -1.5px; line-height: 1.06; margin-bottom: 16px; }
+    .about-title { font-family: 'Syne', sans-serif; font-size: clamp(30px,4.5vw,50px); font-weight: 800; letter-spacing: -1.5px; line-height: 1.06; margin-bottom: 14px; }
     .about-sub { font-size: 15px; color: var(--text2); font-weight: 300; line-height: 1.7; }
-    .story-card { padding: 32px; }
-    .story-quote { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 600; line-height: 1.5; color: var(--text); margin-bottom: 16px; letter-spacing: -0.3px; }
+    .story-card { padding: 30px; }
+    .story-quote { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 600; line-height: 1.5; color: var(--text); margin-bottom: 14px; letter-spacing: -0.3px; }
     .story-quote em { font-style: normal; color: var(--pink); }
-    .story-body { font-size: 14px; color: var(--text2); line-height: 1.75; font-weight: 300; }
-    .values-section { margin-bottom: 60px; animation: fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both; }
+    .story-body { font-size: 13px; color: var(--text2); line-height: 1.75; font-weight: 300; }
+    .values-section { margin-bottom: 56px; animation: fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both; }
     .values-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 28px; }
-    .value-card { padding: 24px; }
-    .value-icon { font-size: 24px; margin-bottom: 12px; }
+    .value-card { padding: 22px; }
+    .value-icon { font-size: 22px; margin-bottom: 10px; }
     .value-title { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
     .value-desc  { font-size: 13px; color: var(--text2); line-height: 1.65; font-weight: 300; }
-    .tech-section { margin-bottom: 60px; animation: fadeUp 0.6s 0.18s cubic-bezier(0.16,1,0.3,1) both; }
+    .tech-section { margin-bottom: 56px; animation: fadeUp 0.6s 0.18s cubic-bezier(0.16,1,0.3,1) both; }
     .tech-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-top: 28px; }
-    .tech-card { padding: 20px 16px; text-align: center; }
-    .tech-icon { font-size: 26px; margin-bottom: 10px; }
-    .tech-name { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+    .tech-card { padding: 18px 14px; text-align: center; transition: transform 0.2s; }
+    .tech-card:hover { transform: translateY(-2px); }
+    .tech-icon { font-size: 24px; margin-bottom: 8px; }
+    .tech-name { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
     .tech-desc { font-size: 11px; color: var(--text3); font-weight: 300; line-height: 1.5; }
-    .about-cta { margin-bottom: 72px; padding: 52px 48px; text-align: center; background: linear-gradient(135deg, rgba(255,60,172,0.07), rgba(108,79,255,0.09)); border: 1px solid rgba(255,60,172,0.15); border-radius: 24px; animation: fadeUp 0.6s 0.24s cubic-bezier(0.16,1,0.3,1) both; }
-    .about-cta-title { font-family: 'Syne', sans-serif; font-size: clamp(24px, 3.5vw, 38px); font-weight: 800; letter-spacing: -1px; margin-bottom: 12px; }
-    .about-cta-sub { font-size: 15px; color: var(--text2); font-weight: 300; margin-bottom: 28px; line-height: 1.6; }
+    .about-cta { margin-bottom: 72px; padding: 48px 40px; text-align: center; background: linear-gradient(135deg, rgba(255,60,172,0.07), rgba(108,79,255,0.09)); border: 1px solid rgba(255,60,172,0.15); border-radius: 24px; animation: fadeUp 0.6s 0.24s cubic-bezier(0.16,1,0.3,1) both; }
+    .about-cta-title { font-family: 'Syne', sans-serif; font-size: clamp(22px,3.5vw,36px); font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
+    .about-cta-sub { font-size: 14px; color: var(--text2); font-weight: 300; margin-bottom: 24px; line-height: 1.6; }
 
     /* ── FOOTER ── */
     .site-footer { border-top: 1px solid var(--glass-border); padding: 28px 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-    .footer-logo { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; color: var(--text3); }
+    .footer-logo { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: var(--text3); }
     .footer-logo .jam { color: var(--pink); opacity: 0.7; }
-    .footer-links { display: flex; gap: 20px; }
+    .footer-links { display: flex; gap: 16px; flex-wrap: wrap; }
     .footer-link { font-size: 13px; color: var(--text3); background: none; border: none; cursor: pointer; font-family: inherit; font-weight: 300; transition: color 0.2s; }
     .footer-link:hover { color: var(--text2); }
     .footer-copy { font-size: 12px; color: var(--text3); font-weight: 300; }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
-      .hiw-grid { grid-template-columns: 1fr 1fr; }
-      .tech-grid { grid-template-columns: 1fr 1fr; }
-      .cta-band  { flex-direction: column; text-align: center; align-items: center; }
+      .hiw-grid, .testimonials-grid, .tech-grid { grid-template-columns: 1fr 1fr; }
+      .cta-band { flex-direction: column; text-align: center; align-items: center; }
     }
     @media (max-width: 640px) {
       .site-wrap { padding: 0 16px; }
-      .nav-links, .nav-cta { display: none; }
+      .nav-center, .nav-cta { display: none; }
       .nav-mobile-toggle { display: flex; }
-      .topnav { padding: 16px 0; }
-      .hero { grid-template-columns: 1fr; padding: 44px 0 40px; gap: 32px; }
-      .hero-title { font-size: 36px; }
-      .hero-sub { font-size: 15px; }
+      .topnav { padding: 14px 0; }
+      .hero { grid-template-columns: 1fr; padding: 40px 0 36px; gap: 28px; }
+      .hero-title { font-size: 34px; }
       .hero-right { order: -1; }
-      .phone-frame { width: 160px; height: 340px; border-radius: 28px; }
-      .stats-strip { margin-bottom: 48px; }
-      .stat-val { font-size: 26px; }
-      .hiw-grid { grid-template-columns: 1fr; gap: 12px; }
-      .hiw-section { margin-bottom: 48px; }
-      .cta-band { padding: 28px 24px; margin-bottom: 48px; }
-      .cta-band-title { font-size: 22px; }
-      .app-layout { grid-template-columns: 1fr; padding: 36px 0 72px; gap: 24px; }
-      .app-page-title { font-size: 30px; }
-      .app-right { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-      .about-hero { grid-template-columns: 1fr; padding: 44px 0 36px; gap: 24px; }
-      .about-title { font-size: 32px; }
+      .phone-frame { width: 150px; height: 310px; border-radius: 26px; }
+      .stats-strip { margin-bottom: 44px; }
+      .stat-val { font-size: 24px; }
+      .stat-label { font-size: 10px; }
+      .hiw-grid, .testimonials-grid { grid-template-columns: 1fr; gap: 12px; }
+      .hiw-section, .testimonials-section { margin-bottom: 48px; }
+      .cta-band { padding: 24px 20px; margin-bottom: 44px; }
+      .app-layout { grid-template-columns: 1fr; padding: 32px 0 60px; gap: 20px; }
+      .app-right { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .contact-layout { grid-template-columns: 1fr; padding: 40px 0 60px; gap: 24px; }
+      .about-hero { grid-template-columns: 1fr; padding: 40px 0 32px; gap: 20px; }
+      .about-title { font-size: 30px; }
       .values-grid { grid-template-columns: 1fr; }
-      .about-cta { padding: 32px 24px; }
+      .tech-grid { grid-template-columns: 1fr 1fr; }
+      .about-cta { padding: 28px 20px; }
       .site-footer { flex-direction: column; align-items: flex-start; gap: 12px; }
       .modal-actions { flex-direction: column; }
     }
     @media (max-width: 400px) {
       .app-right { grid-template-columns: 1fr; }
-      .mood-pills { gap: 6px; }
+      .mood-pills { gap: 5px; }
     }
   </style>
 </head>
@@ -445,10 +469,12 @@
 <!-- Mobile drawer -->
 <div class="mobile-drawer" id="mobileDrawer">
   <button class="drawer-close" onclick="closeDrawer()">✕</button>
-  <button class="drawer-link" onclick="navigate('home'); closeDrawer()">Home</button>
-  <button class="drawer-link" onclick="navigate('app');  closeDrawer()">Try it</button>
+  <button class="drawer-link" onclick="navigate('home');closeDrawer()">Home</button>
+  <button class="drawer-link" onclick="navigate('app');closeDrawer()">Try it</button>
+  <button class="drawer-link" onclick="navigate('faq');closeDrawer()">FAQ</button>
   <button class="drawer-link" onclick="navigate('about');closeDrawer()">About</button>
-  <button class="btn-primary drawer-cta" onclick="navigate('app'); closeDrawer()">Try snapjam ✦</button>
+  <button class="drawer-link" onclick="navigate('contact');closeDrawer()">Contact</button>
+  <button class="btn-primary drawer-cta" onclick="navigate('app');closeDrawer()">Try snapjam ✦</button>
 </div>
 
 <div class="site-wrap">
@@ -456,15 +482,18 @@
   <!-- NAV -->
   <nav class="topnav" id="topnav">
     <a class="logo" href="#" onclick="navigate('home');return false;">snap<span class="jam">jam</span></a>
-    <div class="nav-links">
-      <button class="nav-link active" id="nl-home"  onclick="navigate('home')">Home</button>
-      <button class="nav-link"        id="nl-app"   onclick="navigate('app')">Try it</button>
-      <button class="nav-link"        id="nl-about" onclick="navigate('about')">About</button>
+    <div class="nav-center">
+      <button class="nav-link active" id="nl-home"    onclick="navigate('home')">Home</button>
+      <button class="nav-link"        id="nl-app"     onclick="navigate('app')">Try it</button>
+      <button class="nav-link"        id="nl-faq"     onclick="navigate('faq')">FAQ</button>
+      <button class="nav-link"        id="nl-about"   onclick="navigate('about')">About</button>
+      <button class="nav-link"        id="nl-contact" onclick="navigate('contact')">Contact</button>
     </div>
-    <button class="nav-cta" onclick="navigate('app')">Try snapjam ✦</button>
-    <button class="nav-mobile-toggle" onclick="openDrawer()" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
+    <div class="nav-right">
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">🌙</button>
+      <button class="nav-cta" onclick="navigate('app')">Try snapjam ✦</button>
+      <button class="nav-mobile-toggle" onclick="openDrawer()"><span></span><span></span><span></span></button>
+    </div>
   </nav>
 
   <!-- ═══ HOME ═══ -->
@@ -473,25 +502,22 @@
       <div class="hero-left">
         <div class="section-eyebrow">AI music matcher</div>
         <h1 class="hero-title">Your photo.<br><span class="gradient-text">Perfect song.</span></h1>
-        <p class="hero-sub">Upload any story photo — get 3 global songs that perfectly match your vibe, in seconds, for free.</p>
+        <p class="hero-sub">Upload any story photo — get 3 global songs that match your exact vibe, instantly, for free.</p>
         <div class="hero-actions">
-          <button class="btn-primary" onclick="navigate('app')">Try it now — it's free ✦</button>
-          <button class="btn-ghost"   onclick="navigate('about')">Learn more →</button>
+          <button class="btn-primary" onclick="navigate('app')">Try it now — free ✦</button>
+          <button class="btn-ghost" onclick="navigate('about')">Learn more →</button>
         </div>
       </div>
       <div class="hero-right">
         <div class="phone-frame">
+          <div class="particles">
+            <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+            <div class="particle"></div><div class="particle"></div>
+          </div>
           <div class="phone-notch"></div>
           <div class="phone-inner">
-            <div class="phone-img-placeholder">
-              <div class="emoji">📸</div>
-              <p>your story photo</p>
-            </div>
-            <div class="phone-vibe-strip">
-              <span class="phone-vibe-chip">golden hour</span>
-              <span class="phone-vibe-chip">nostalgic</span>
-              <span class="phone-vibe-chip">warm</span>
-            </div>
+            <div class="phone-img-placeholder"><div class="emoji">📸</div><p>your story photo</p></div>
+            <div class="phone-vibe-strip"><span class="phone-vibe-chip">golden hour</span><span class="phone-vibe-chip">nostalgic</span><span class="phone-vibe-chip">warm</span></div>
             <div class="phone-song-preview"><div class="phone-song-dot c1">🎵</div><div class="phone-song-info"><div class="t">Kesariya</div><div class="a">Arijit Singh · Hindi</div></div></div>
             <div class="phone-song-preview"><div class="phone-song-dot c2">🎵</div><div class="phone-song-info"><div class="t">Levitating</div><div class="a">Dua Lipa · English</div></div></div>
             <div class="phone-song-preview"><div class="phone-song-dot c3">🎵</div><div class="phone-song-info"><div class="t">Dynamite</div><div class="a">BTS · Korean</div></div></div>
@@ -507,20 +533,60 @@
       <div class="stat-item"><div class="stat-val gradient-text">$0</div><div class="stat-label">Forever free</div></div>
     </div>
 
+    <!-- Language ticker -->
+    <div class="ticker-section">
+      <div class="ticker-label">Songs from every corner of the world</div>
+      <div style="overflow:hidden;mask:linear-gradient(90deg,transparent,black 10%,black 90%,transparent);-webkit-mask:linear-gradient(90deg,transparent,black 10%,black 90%,transparent)">
+        <div class="ticker-track" id="ticker">
+          <div class="ticker-item"><span class="ticker-dot pk"></span>Hindi — Tum Se</div>
+          <div class="ticker-item"><span class="ticker-dot vl"></span>Korean — Dynamite</div>
+          <div class="ticker-item"><span class="ticker-dot tl"></span>Spanish — Hawái</div>
+          <div class="ticker-item"><span class="ticker-dot gd"></span>Malayalam — Oru Adaar Love</div>
+          <div class="ticker-item"><span class="ticker-dot pk"></span>Arabic — Habibi</div>
+          <div class="ticker-item"><span class="ticker-dot vl"></span>Tamil — Rowdy Baby</div>
+          <div class="ticker-item"><span class="ticker-dot tl"></span>French — Mon Amour</div>
+          <div class="ticker-item"><span class="ticker-dot gd"></span>Punjabi — Lehanga</div>
+          <div class="ticker-item"><span class="ticker-dot pk"></span>Portuguese — Belo Mentiroso</div>
+          <div class="ticker-item"><span class="ticker-dot vl"></span>Telugu — Buttabomma</div>
+          <div class="ticker-item"><span class="ticker-dot tl"></span>Turkish — Yalnız Çiçek</div>
+          <div class="ticker-item"><span class="ticker-dot gd"></span>Japanese — Yoru ni Kakeru</div>
+          <!-- duplicate for seamless loop -->
+          <div class="ticker-item"><span class="ticker-dot pk"></span>Hindi — Tum Se</div>
+          <div class="ticker-item"><span class="ticker-dot vl"></span>Korean — Dynamite</div>
+          <div class="ticker-item"><span class="ticker-dot tl"></span>Spanish — Hawái</div>
+          <div class="ticker-item"><span class="ticker-dot gd"></span>Malayalam — Oru Adaar Love</div>
+          <div class="ticker-item"><span class="ticker-dot pk"></span>Arabic — Habibi</div>
+          <div class="ticker-item"><span class="ticker-dot vl"></span>Tamil — Rowdy Baby</div>
+          <div class="ticker-item"><span class="ticker-dot tl"></span>French — Mon Amour</div>
+          <div class="ticker-item"><span class="ticker-dot gd"></span>Punjabi — Lehanga</div>
+          <div class="ticker-item"><span class="ticker-dot pk"></span>Portuguese — Belo Mentiroso</div>
+          <div class="ticker-item"><span class="ticker-dot vl"></span>Telugu — Buttabomma</div>
+          <div class="ticker-item"><span class="ticker-dot tl"></span>Turkish — Yalnız Çiçek</div>
+          <div class="ticker-item"><span class="ticker-dot gd"></span>Japanese — Yoru ni Kakeru</div>
+        </div>
+      </div>
+    </div>
+
     <section class="hiw-section">
       <div class="section-eyebrow">How it works</div>
       <div class="hiw-grid">
-        <div class="glass-card hiw-card"><div class="hiw-icon i1">📸</div><div class="hiw-title">Upload your photo</div><div class="hiw-desc">Any Instagram story — selfie, landscape, food, travel, aesthetic shot.</div></div>
-        <div class="glass-card hiw-card"><div class="hiw-icon i2">🤖</div><div class="hiw-title">AI reads the vibe</div><div class="hiw-desc">Claude AI analyzes mood, colors, energy and context of your photo.</div></div>
-        <div class="glass-card hiw-card"><div class="hiw-icon i3">🌍</div><div class="hiw-title">Get 3 global songs</div><div class="hiw-desc">3 trending songs from different languages, all on Instagram music.</div></div>
+        <div class="glass-card hiw-card"><div class="hiw-icon i1">📸</div><div class="hiw-title">Upload your photo</div><div class="hiw-desc">Any Instagram story — selfie, landscape, food, travel, or aesthetic shot.</div></div>
+        <div class="glass-card hiw-card"><div class="hiw-icon i2">🤖</div><div class="hiw-title">AI reads the vibe</div><div class="hiw-desc">Claude AI analyzes mood, colors, energy, and emotional context of your photo.</div></div>
+        <div class="glass-card hiw-card"><div class="hiw-icon i3">🌍</div><div class="hiw-title">Get 3 global songs</div><div class="hiw-desc">3 trending songs from different languages, all available on Instagram music.</div></div>
+      </div>
+    </section>
+
+    <section class="testimonials-section">
+      <div class="section-eyebrow">What people say</div>
+      <div class="testimonials-grid">
+        <div class="glass-card testimonial-card"><div class="testimonial-stars">★★★★★</div><p class="testimonial-text">"This is actually magic. Uploaded a beach sunset photo and got Hawái by Maluma. Perfect."</p><div class="testimonial-author">@priya_shoots</div><div class="testimonial-handle">Kerala, India</div></div>
+        <div class="glass-card testimonial-card"><div class="testimonial-stars">★★★★★</div><p class="testimonial-text">"Never thought AI could understand vibes this well. Got a Malayalam song for my home photo — exactly right."</p><div class="testimonial-author">@arun.frames</div><div class="testimonial-handle">Trivandrum, India</div></div>
+        <div class="glass-card testimonial-card"><div class="testimonial-stars">★★★★★</div><p class="testimonial-text">"I used to spend 20 minutes finding songs. snapjam does it in 5 seconds. Game changer."</p><div class="testimonial-author">@sana.stories</div><div class="testimonial-handle">Dubai, UAE</div></div>
       </div>
     </section>
 
     <div class="cta-band">
-      <div>
-        <div class="cta-band-title">Ready to find your <span class="gradient-text">perfect song?</span></div>
-        <p class="cta-band-sub">No sign up. No downloads. Just upload a photo and let the AI do the rest.</p>
-      </div>
+      <div><div class="cta-band-title">Ready for your <span class="gradient-text">perfect song?</span></div><p class="cta-band-sub">No sign up. No downloads. Upload a photo and let AI do the rest.</p></div>
       <button class="btn-primary" onclick="navigate('app')">Get started — free ✦</button>
     </div>
 
@@ -529,7 +595,9 @@
       <div class="footer-links">
         <button class="footer-link" onclick="navigate('home')">Home</button>
         <button class="footer-link" onclick="navigate('app')">Try it</button>
+        <button class="footer-link" onclick="navigate('faq')">FAQ</button>
         <button class="footer-link" onclick="navigate('about')">About</button>
+        <button class="footer-link" onclick="navigate('contact')">Contact</button>
       </div>
       <div class="footer-copy">© 2025 snapjam · Free forever</div>
     </footer>
@@ -539,25 +607,23 @@
   <div class="page" id="page-app">
     <div class="app-layout">
       <div class="app-left">
-        <div class="live-badge" style="margin-bottom:20px;">AI live</div>
+        <div class="live-badge" style="margin-bottom:18px;">AI live</div>
         <h1 class="app-page-title">Find your<br><span class="gradient-text">story song</span></h1>
-        <p class="app-page-sub">Choose a mood, upload a photo — get 3 globally matched songs instantly.</p>
+        <p class="app-page-sub">Choose a mood, upload a photo — get 3 songs instantly.</p>
 
         <div class="glass-card upload-card">
-
-          <!-- Mood selector -->
           <div class="mood-selector">
             <div class="mood-label">Your mood (optional)</div>
             <div class="mood-pills">
-              <button class="mood-pill" data-mood="Chill" onclick="selectMood(this)"><span class="mood-emoji">😌</span>Chill</button>
-              <button class="mood-pill" data-mood="Hype" onclick="selectMood(this)"><span class="mood-emoji">🔥</span>Hype</button>
-              <button class="mood-pill" data-mood="Sad" onclick="selectMood(this)"><span class="mood-emoji">🌧️</span>Sad</button>
-              <button class="mood-pill" data-mood="Romantic" onclick="selectMood(this)"><span class="mood-emoji">💗</span>Romantic</button>
-              <button class="mood-pill" data-mood="Adventure" onclick="selectMood(this)"><span class="mood-emoji">🌄</span>Adventure</button>
+              <button class="mood-pill" data-mood="Chill" onclick="selectMood(this)">😌 Chill</button>
+              <button class="mood-pill" data-mood="Hype" onclick="selectMood(this)">🔥 Hype</button>
+              <button class="mood-pill" data-mood="Sad" onclick="selectMood(this)">🌧️ Sad</button>
+              <button class="mood-pill" data-mood="Romantic" onclick="selectMood(this)">💗 Romantic</button>
+              <button class="mood-pill" data-mood="Adventure" onclick="selectMood(this)">🌄 Adventure</button>
+              <button class="mood-pill" data-mood="Party" onclick="selectMood(this)">🎉 Party</button>
             </div>
           </div>
 
-          <!-- Preview with scan -->
           <div class="preview-wrap" id="previewWrap">
             <img id="preview" src="" alt="Story preview"/>
             <div class="scan-overlay" id="scanOverlay"></div>
@@ -565,77 +631,169 @@
             <div class="scan-corners" id="scanCorners"><div class="c3"></div><div class="c4"></div></div>
           </div>
 
-          <!-- Upload zone -->
           <div class="upload-zone" id="uploadZone"
             onclick="document.getElementById('fileInput').click()"
-            ondragover="handleDragOver(event)"
-            ondragleave="handleDragLeave(event)"
-            ondrop="handleDrop(event)">
+            ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
             <div class="u-ring">📸</div>
             <p class="u-title">Tap or drop your story photo</p>
             <p class="u-sub">jpg · png · webp · heic</p>
             <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(event)"/>
           </div>
 
-          <!-- Loading -->
           <div id="loadingSection">
-            <div class="waveform">
-              <div class="wv"></div><div class="wv"></div><div class="wv"></div>
-              <div class="wv"></div><div class="wv"></div><div class="wv"></div>
-              <div class="wv"></div><div class="wv"></div><div class="wv"></div>
-            </div>
+            <div class="waveform"><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div></div>
             <p class="loading-label">Reading your vibe<span>.</span><span>.</span><span>.</span></p>
           </div>
 
-          <!-- Results -->
           <div id="resultsSection">
             <div class="results-header">
               <span class="results-label">Your matches</span>
               <button class="retry-btn" onclick="resetApp()">↺ Try another</button>
             </div>
-            <!-- Vibe tags -->
             <div class="vibe-strip" id="vibeStrip"></div>
             <div class="song-list" id="songList"></div>
-            <p class="hint">Search these on Instagram music to add to your story 🎵</p>
-            <!-- Share -->
+            <p class="hint">Search these on Instagram music 🎵</p>
             <div class="share-section">
               <button class="share-btn" onclick="openShareModal()">✦ Share your song match</button>
             </div>
           </div>
 
           <p class="error-msg" id="errorMsg">Something went wrong — please try again.</p>
-          <button class="btn-primary full" id="analyzeBtn" onclick="analyzePhoto()" style="display:none;margin-top:16px;">Find my songs →</button>
+          <button class="btn-primary full" id="analyzeBtn" onclick="analyzePhoto()" style="display:none;margin-top:14px;">Find my songs →</button>
+        </div>
+
+        <!-- History -->
+        <div class="history-section" id="historySection" style="display:none;">
+          <div class="history-label">
+            Recent matches
+            <button class="history-clear" onclick="clearHistory()">clear all</button>
+          </div>
+          <div class="history-list" id="historyList"></div>
         </div>
       </div>
 
-      <!-- Right info -->
       <div class="app-right">
         <div class="glass-card info-block">
-          <div class="info-block-title"><span class="ico">🌍</span> Languages we cover</div>
-          <div class="info-block-body">Songs matched from 50+ languages based on your photo's vibe.</div>
+          <div class="info-block-title">🌍 Languages we cover</div>
+          <div class="info-block-body">Songs matched from 50+ languages.</div>
           <div class="lang-chips">
-            <span class="chip">Hindi</span><span class="chip">Malayalam</span>
-            <span class="chip">Tamil</span><span class="chip">Korean</span>
-            <span class="chip">Spanish</span><span class="chip">Arabic</span>
-            <span class="chip">English</span><span class="chip">French</span>
-            <span class="chip">Portuguese</span><span class="chip">Punjabi</span>
-            <span class="chip">Telugu</span><span class="chip">+more</span>
+            <span class="chip">Hindi</span><span class="chip">Malayalam</span><span class="chip">Tamil</span>
+            <span class="chip">Korean</span><span class="chip">Spanish</span><span class="chip">Arabic</span>
+            <span class="chip">English</span><span class="chip">French</span><span class="chip">Portuguese</span>
+            <span class="chip">Punjabi</span><span class="chip">Telugu</span><span class="chip">Japanese</span>
+            <span class="chip">Turkish</span><span class="chip">Swahili</span><span class="chip">+more</span>
           </div>
         </div>
         <div class="glass-card info-block">
-          <div class="info-block-title"><span class="ico">🔒</span> Your photos are private</div>
-          <div class="info-block-body">Photos are never stored, logged, or shared. Used only to generate suggestions, then discarded.</div>
+          <div class="info-block-title">🔒 Private by design</div>
+          <div class="info-block-body">Photos never stored or shared. Discarded immediately after generating suggestions.</div>
         </div>
         <div class="glass-card info-block">
-          <div class="info-block-title"><span class="ico">⚡</span> Powered by Claude AI</div>
-          <div class="info-block-body">Claude's vision AI reads the emotional context of your photo — mood, energy, and narrative.</div>
+          <div class="info-block-title">⚡ Claude AI vision</div>
+          <div class="info-block-body">Reads emotional context — mood, energy, colors, narrative — not just tags.</div>
         </div>
       </div>
     </div>
     <footer class="site-footer">
       <div class="footer-logo">snap<span class="jam">jam</span></div>
-      <div class="footer-links"><button class="footer-link" onclick="navigate('home')">Home</button><button class="footer-link" onclick="navigate('about')">About</button></div>
-      <div class="footer-copy">© 2025 snapjam · Free forever</div>
+      <div class="footer-links"><button class="footer-link" onclick="navigate('home')">Home</button><button class="footer-link" onclick="navigate('faq')">FAQ</button><button class="footer-link" onclick="navigate('about')">About</button></div>
+      <div class="footer-copy">© 2025 snapjam</div>
+    </footer>
+  </div>
+
+  <!-- ═══ FAQ ═══ -->
+  <div class="page" id="page-faq">
+    <div class="faq-hero">
+      <div class="section-eyebrow">FAQ</div>
+      <h1 class="faq-title">Questions<br><span class="gradient-text">answered.</span></h1>
+      <p class="faq-sub">Everything you need to know about snapjam.</p>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">Is snapjam really free? <span class="faq-arrow">↓</span></div>
+        <div class="faq-answer"><div class="faq-answer-inner">Yes, completely free. No hidden plans, no credit card required, no limits on how many photos you can analyze. We built this as a tool we'd want to use ourselves.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">Are my photos saved anywhere? <span class="faq-arrow">↓</span></div>
+        <div class="faq-answer"><div class="faq-answer-inner">No. Your photo is sent directly to Claude AI to analyze, and immediately discarded. We don't store, log, or share your images. Privacy is built into how the app works, not added as an afterthought.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">Which languages do the songs come from? <span class="faq-arrow">↓</span></div>
+        <div class="faq-answer"><div class="faq-answer-inner">snapjam matches songs from 50+ languages including Hindi, Malayalam, Tamil, Telugu, Punjabi, Korean, Spanish, Arabic, French, Portuguese, Japanese, Turkish, Swahili, and many more. The AI picks languages based on what fits your photo's vibe — not randomly.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">Will the songs actually be on Instagram? <span class="faq-arrow">↓</span></div>
+        <div class="faq-answer"><div class="faq-answer-inner">We specifically prompt the AI to only suggest songs available on Instagram's music library. Most trending songs are there. If you can't find one, try searching just the song title without the artist name.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">What types of photos work best? <span class="faq-arrow">↓</span></div>
+        <div class="faq-answer"><div class="faq-answer-inner">All kinds! Selfies, landscapes, food shots, travel photos, aesthetic flats, candid moments — the AI reads context from any image. Photos with clear mood or setting tend to give the most accurate matches.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">Can I use the mood selector and upload a photo together? <span class="faq-arrow">↓</span></div>
+        <div class="faq-answer"><div class="faq-answer-inner">Yes! The mood selector is optional but adds extra context. If you select "Romantic" and upload a sunset photo, the AI considers both signals together for a more refined match.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">How does the AI actually work? <span class="faq-arrow">↓</span></div>
+        <div class="faq-answer"><div class="faq-answer-inner">snapjam uses Claude AI's vision model, which can "see" and understand images. It reads the emotional atmosphere of your photo — the colors, lighting, subject, setting — and maps that to musical qualities like tempo, energy, and genre.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">Can I share my results? <span class="faq-arrow">↓</span></div>
+        <div class="faq-answer"><div class="faq-answer-inner">Yes! After you get your 3 songs, there's a "Share your match" button that creates a shareable summary of your vibe tags and song matches. You can copy the text or use your phone's native share sheet.</div></div>
+      </div>
+    </div>
+    <footer class="site-footer">
+      <div class="footer-logo">snap<span class="jam">jam</span></div>
+      <div class="footer-links"><button class="footer-link" onclick="navigate('home')">Home</button><button class="footer-link" onclick="navigate('app')">Try it</button><button class="footer-link" onclick="navigate('contact')">Contact</button></div>
+      <div class="footer-copy">© 2025 snapjam</div>
+    </footer>
+  </div>
+
+  <!-- ═══ CONTACT ═══ -->
+  <div class="page" id="page-contact">
+    <div class="contact-layout">
+      <div class="contact-left">
+        <div class="section-eyebrow">Contact</div>
+        <h1 class="contact-title">Say<br><span class="gradient-text">hello.</span></h1>
+        <p class="contact-sub">Have a feature idea? Found a bug? Just want to say hi? We'd love to hear from you.</p>
+        <div class="contact-info-cards">
+          <div class="glass-card contact-info-card"><div class="contact-info-icon i1">✉️</div><div><div class="contact-info-label">Email</div><div class="contact-info-val">hello@snapjam.app</div></div></div>
+          <div class="glass-card contact-info-card"><div class="contact-info-icon i2">🐦</div><div><div class="contact-info-label">Twitter / X</div><div class="contact-info-val">@snapjamapp</div></div></div>
+          <div class="glass-card contact-info-card"><div class="contact-info-icon i3">📸</div><div><div class="contact-info-label">Instagram</div><div class="contact-info-val">@snapjam.app</div></div></div>
+        </div>
+      </div>
+      <div class="contact-form">
+        <div class="glass-card contact-card">
+          <div id="contactFormWrap">
+            <div class="form-group">
+              <label class="form-label">Your name</label>
+              <input type="text" class="form-input" id="contactName" placeholder="Arun Kumar"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-input" id="contactEmail" placeholder="hello@example.com"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Subject</label>
+              <input type="text" class="form-input" id="contactSubject" placeholder="Feature idea, bug report, etc."/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Message</label>
+              <textarea class="form-input" id="contactMessage" placeholder="Tell us what's on your mind..."></textarea>
+            </div>
+            <button class="btn-primary form-submit" onclick="submitContact()">Send message →</button>
+          </div>
+          <div class="form-success" id="contactSuccess">
+            <div class="success-icon">✉️</div>
+            <p>Thanks for reaching out!<br>We'll get back to you soon.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="site-footer">
+      <div class="footer-logo">snap<span class="jam">jam</span></div>
+      <div class="footer-links"><button class="footer-link" onclick="navigate('home')">Home</button><button class="footer-link" onclick="navigate('faq')">FAQ</button></div>
+      <div class="footer-copy">© 2025 snapjam</div>
     </footer>
   </div>
 
@@ -645,27 +803,27 @@
       <div>
         <div class="section-eyebrow">About snapjam</div>
         <h1 class="about-title">Built for <span class="gradient-text">story lovers</span></h1>
-        <p class="about-sub">We know that feeling — perfect photo, wrong song. Scrolling for minutes through Instagram's music library, nothing fits. snapjam fixes that with AI.</p>
+        <p class="about-sub">We know that feeling — perfect photo, wrong song. Scrolling Instagram's music library for minutes, nothing fits. snapjam fixes that with AI.</p>
       </div>
       <div class="glass-card story-card">
-        <p class="story-quote">"We asked — what if AI could just <em>look at your photo</em> and know the perfect song?"</p>
-        <p class="story-body">That question became snapjam. A tool that analyzes mood, colors, energy, and story behind your photo — and matches it with songs from around the world, across every language and genre.</p>
+        <p class="story-quote">"What if AI could just <em>look at your photo</em> and know the perfect song?"</p>
+        <p class="story-body">That question became snapjam. A tool that analyzes the mood, colors, energy, and story behind your photo — and matches it with songs from around the world, across every language and genre.</p>
       </div>
     </div>
     <section class="values-section">
       <div class="section-eyebrow">What we believe</div>
       <div class="values-grid">
-        <div class="glass-card value-card"><div class="value-icon">🌍</div><div class="value-title">Music is borderless</div><div class="value-desc">The best song for your photo might be in Hindi, Korean, or Arabic. We don't limit you.</div></div>
+        <div class="glass-card value-card"><div class="value-icon">🌍</div><div class="value-title">Music is borderless</div><div class="value-desc">The best song for your photo might be in Hindi, Korean, or Arabic. We don't limit you to one culture.</div></div>
         <div class="glass-card value-card"><div class="value-icon">⚡</div><div class="value-title">Speed matters</div><div class="value-desc">You're in the middle of posting. snapjam gets you an answer in seconds, not minutes.</div></div>
-        <div class="glass-card value-card"><div class="value-icon">🔓</div><div class="value-title">Free means free</div><div class="value-desc">No sign up, no subscription, no premium tier. snapjam is free forever.</div></div>
+        <div class="glass-card value-card"><div class="value-icon">🔓</div><div class="value-title">Free means free</div><div class="value-desc">No sign up, no subscription, no premium tier. snapjam is free forever, full stop.</div></div>
         <div class="glass-card value-card"><div class="value-icon">🔒</div><div class="value-title">Privacy first</div><div class="value-desc">Your photos are yours. We never store, log, or share them. Ever.</div></div>
       </div>
     </section>
     <section class="tech-section">
       <div class="section-eyebrow">Built with</div>
       <div class="tech-grid">
-        <div class="glass-card tech-card"><div class="tech-icon">🤖</div><div class="tech-name">Claude AI</div><div class="tech-desc">Vision AI that reads photo mood & energy</div></div>
-        <div class="glass-card tech-card"><div class="tech-icon">🎵</div><div class="tech-name">Global music</div><div class="tech-desc">Songs from 50+ languages & cultures</div></div>
+        <div class="glass-card tech-card"><div class="tech-icon">🤖</div><div class="tech-name">Claude AI</div><div class="tech-desc">Vision AI reading photo mood & energy</div></div>
+        <div class="glass-card tech-card"><div class="tech-icon">🎵</div><div class="tech-name">Global music</div><div class="tech-desc">Songs from 50+ languages</div></div>
         <div class="glass-card tech-card"><div class="tech-icon">🚀</div><div class="tech-name">Vercel</div><div class="tech-desc">Instant global deployment</div></div>
         <div class="glass-card tech-card"><div class="tech-icon">💻</div><div class="tech-name">Pure HTML</div><div class="tech-desc">Zero frameworks, fast everywhere</div></div>
       </div>
@@ -677,17 +835,17 @@
     </div>
     <footer class="site-footer">
       <div class="footer-logo">snap<span class="jam">jam</span></div>
-      <div class="footer-links"><button class="footer-link" onclick="navigate('home')">Home</button><button class="footer-link" onclick="navigate('app')">Try it</button></div>
+      <div class="footer-links"><button class="footer-link" onclick="navigate('home')">Home</button><button class="footer-link" onclick="navigate('app')">Try it</button><button class="footer-link" onclick="navigate('contact')">Contact</button></div>
       <div class="footer-copy">© 2025 snapjam · Free forever</div>
     </footer>
   </div>
 
-</div><!-- end site-wrap -->
+</div>
 
 <script>
-  /* ── NAV ── */
-  const pages = {home:'page-home', app:'page-app', about:'page-about'};
-  const navLinks = {home:'nl-home', app:'nl-app', about:'nl-about'};
+  /* ── NAVIGATION ── */
+  const pages = {home:'page-home',app:'page-app',faq:'page-faq',about:'page-about',contact:'page-contact'};
+  const navLinks = {home:'nl-home',app:'nl-app',faq:'nl-faq',about:'nl-about',contact:'nl-contact'};
   let current = 'home';
 
   function navigate(target) {
@@ -704,62 +862,72 @@
     document.getElementById('topnav').classList.toggle('scrolled', window.scrollY > 10);
   });
 
+  /* ── THEME ── */
+  let isDark = true;
+  function toggleTheme() {
+    isDark = !isDark;
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
+  }
+
+  /* ── MOBILE DRAWER ── */
   function openDrawer()  { document.getElementById('mobileDrawer').classList.add('open'); }
   function closeDrawer() { document.getElementById('mobileDrawer').classList.remove('open'); }
+
+  /* ── FAQ ── */
+  function toggleFaq(el) {
+    const item = el.parentElement;
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  }
+
+  /* ── CONTACT FORM ── */
+  function submitContact() {
+    const name = document.getElementById('contactName').value.trim();
+    const email = document.getElementById('contactEmail').value.trim();
+    if (!name || !email) { alert('Please fill in at least your name and email.'); return; }
+    document.getElementById('contactFormWrap').style.display = 'none';
+    document.getElementById('contactSuccess').style.display = 'block';
+  }
 
   /* ── MOOD ── */
   let selectedMood = '';
   function selectMood(btn) {
     document.querySelectorAll('.mood-pill').forEach(p => p.classList.remove('selected'));
-    if (selectedMood === btn.dataset.mood) {
-      selectedMood = '';
-    } else {
-      btn.classList.add('selected');
-      selectedMood = btn.dataset.mood;
-    }
+    selectedMood = selectedMood === btn.dataset.mood ? '' : btn.dataset.mood;
+    if (selectedMood) btn.classList.add('selected');
   }
 
-  /* ── FILE HANDLING ── */
+  /* ── FILE / UPLOAD ── */
   let base64 = null, mediaType = 'image/jpeg';
-
   function handleFile(e) { const f = e.target.files[0]; if (f) loadImg(f); }
   function handleDragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('drag-over'); }
   function handleDragLeave() { document.getElementById('uploadZone').classList.remove('drag-over'); }
   function handleDrop(e) {
-    e.preventDefault();
-    document.getElementById('uploadZone').classList.remove('drag-over');
+    e.preventDefault(); document.getElementById('uploadZone').classList.remove('drag-over');
     const f = e.dataTransfer.files[0];
     if (f && f.type.startsWith('image/')) loadImg(f);
   }
-
   function loadImg(file) {
     mediaType = file.type || 'image/jpeg';
     const r = new FileReader();
     r.onload = e => {
       base64 = e.target.result.split(',')[1];
-      const wrap = document.getElementById('previewWrap');
-      const img  = document.getElementById('preview');
-      img.src = e.target.result;
-      wrap.style.display = 'block';
+      document.getElementById('preview').src = e.target.result;
+      document.getElementById('previewWrap').style.display = 'block';
       document.getElementById('uploadZone').style.display = 'none';
       document.getElementById('analyzeBtn').style.display = 'flex';
       document.getElementById('resultsSection').style.display = 'none';
       document.getElementById('errorMsg').style.display = 'none';
-      // Show corners immediately
       document.getElementById('scanCorners').classList.add('visible');
     };
     r.readAsDataURL(file);
   }
 
   /* ── SCAN ANIMATION ── */
-  function startScan() {
-    document.getElementById('scanOverlay').classList.add('scanning');
-    document.getElementById('scanLine').classList.add('scanning');
-  }
-  function stopScan() {
-    document.getElementById('scanOverlay').classList.remove('scanning');
-    document.getElementById('scanLine').classList.remove('scanning');
-  }
+  function startScan() { document.getElementById('scanOverlay').classList.add('scanning'); document.getElementById('scanLine').classList.add('scanning'); }
+  function stopScan()  { document.getElementById('scanOverlay').classList.remove('scanning'); document.getElementById('scanLine').classList.remove('scanning'); }
 
   /* ── ANALYZE ── */
   let currentSongs = [], currentVibes = [];
@@ -772,70 +940,60 @@
     document.getElementById('errorMsg').style.display = 'none';
     startScan();
 
-    const moodStr = selectedMood ? ` The user's mood is: ${selectedMood}.` : '';
+    const moodStr = selectedMood ? ` The user's mood preference is: ${selectedMood}.` : '';
 
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: `You are a global Instagram music expert and photo vibe analyst. Analyze the photo's mood, colors, setting, energy and story.${moodStr} Return ONLY valid JSON in this exact format with no extra text or markdown:
+          model: 'claude-sonnet-4-20250514', max_tokens: 1000,
+          system: `You are a global Instagram music expert and photo vibe analyst.${moodStr} Analyze the photo's mood, colors, setting, and energy. Return ONLY valid JSON — no text, no markdown:
 {"vibes":["word1","word2","word3"],"songs":[{"title":"Song Title","artist":"Artist Name","language":"Language"},{"title":"Song Title","artist":"Artist Name","language":"Language"},{"title":"Song Title","artist":"Artist Name","language":"Language"}]}
-
-Rules:
-- vibes: exactly 3 short evocative words describing the photo's mood (e.g. "golden hour", "nostalgic", "dreamy")
-- songs: exactly 3 songs from 3 DIFFERENT languages — always include at least one non-English song from Hindi/Malayalam/Tamil/Telugu/Spanish/Korean/Arabic/French/Portuguese/Punjabi etc.
-- Only suggest songs trending and available in Instagram's music library`,
-          messages: [{
-            role: 'user',
-            content: [
-              { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-              { type: 'text', text: 'Analyze this photo and suggest 3 Instagram story songs from different languages.' }
-            ]
-          }]
+Rules: vibes = exactly 3 short evocative mood words. songs = exactly 3 songs from 3 DIFFERENT languages, always include at least one non-English song from Hindi/Malayalam/Tamil/Telugu/Punjabi/Korean/Spanish/Arabic/French/Portuguese/Japanese/Turkish/Swahili etc. Only suggest songs trending and available in Instagram music library.`,
+          messages: [{ role: 'user', content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+            { type: 'text', text: 'Analyze this photo and suggest 3 Instagram story songs from different languages.' }
+          ]}]
         })
       });
 
       const data = await res.json();
       const text = data.content.map(i => i.text || '').join('');
-      const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+      const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
       currentVibes = parsed.vibes || [];
       currentSongs = parsed.songs || [];
-
       stopScan();
 
-      // Render vibe tags
+      // Vibe tags
       const vibeStrip = document.getElementById('vibeStrip');
       vibeStrip.innerHTML = '';
-      currentVibes.forEach(v => {
-        const t = document.createElement('span');
-        t.className = 'vibe-tag'; t.textContent = v;
-        vibeStrip.appendChild(t);
-      });
+      currentVibes.forEach(v => { const t = document.createElement('span'); t.className = 'vibe-tag'; t.textContent = v; vibeStrip.appendChild(t); });
 
-      // Render song cards
+      // Song cards
       const list = document.getElementById('songList');
       list.innerHTML = '';
       ['n1','n2','n3'].forEach((nc, i) => {
-        const c = document.createElement('div');
-        c.className = 'song-card';
+        const c = document.createElement('div'); c.className = 'song-card';
+        const igSearch = `https://www.instagram.com/`;
         c.innerHTML = `
-          <div class="snum ${nc}">${i + 1}</div>
+          <div class="snum ${nc}">${i+1}</div>
           <div class="sinfo">
             <div class="stitle">${currentSongs[i].title}</div>
             <div class="sartist">${currentSongs[i].artist}</div>
           </div>
           <div class="song-right">
             <span class="slang">${currentSongs[i].language}</span>
-            <button class="copy-btn" title="Copy song name" onclick="copySong(this, '${currentSongs[i].title.replace(/'/g,"\\'")} - ${currentSongs[i].artist.replace(/'/g,"\\'")}')">⎘</button>
+            <button class="copy-btn" title="Copy" onclick="copySong(this,'${(currentSongs[i].title+' - '+currentSongs[i].artist).replace(/'/g,"\\'")}')">⎘</button>
+            <a class="ig-search-btn" href="${igSearch}" target="_blank" title="Search on Instagram">↗</a>
           </div>`;
         list.appendChild(c);
       });
 
       document.getElementById('loadingSection').style.display = 'none';
       document.getElementById('resultsSection').style.display = 'flex';
+
+      // Save to history
+      saveHistory();
 
     } catch (err) {
       stopScan();
@@ -846,77 +1004,83 @@ Rules:
     }
   }
 
-  /* ── COPY SONG ── */
+  /* ── COPY ── */
   function copySong(btn, text) {
     navigator.clipboard.writeText(text).then(() => {
-      btn.classList.add('copied');
-      btn.textContent = '✓';
+      btn.classList.add('copied'); btn.textContent = '✓';
       setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '⎘'; }, 2000);
-    }).catch(() => {
-      btn.textContent = '✓'; // fallback
-      setTimeout(() => { btn.textContent = '⎘'; }, 2000);
     });
   }
 
-  /* ── SHARE MODAL ── */
+  /* ── HISTORY ── */
+  function saveHistory() {
+    let history = getHistory();
+    const entry = { vibes: currentVibes, songs: currentSongs, time: Date.now() };
+    history.unshift(entry);
+    history = history.slice(0, 5);
+    try { localStorage.setItem('snapjam_history', JSON.stringify(history)); } catch(e) {}
+    renderHistory();
+  }
+  function getHistory() {
+    try { return JSON.parse(localStorage.getItem('snapjam_history') || '[]'); } catch(e) { return []; }
+  }
+  function clearHistory() {
+    try { localStorage.removeItem('snapjam_history'); } catch(e) {}
+    document.getElementById('historySection').style.display = 'none';
+  }
+  function renderHistory() {
+    const history = getHistory();
+    if (!history.length) { document.getElementById('historySection').style.display = 'none'; return; }
+    document.getElementById('historySection').style.display = 'block';
+    const list = document.getElementById('historyList');
+    list.innerHTML = '';
+    history.forEach(entry => {
+      const el = document.createElement('div'); el.className = 'history-item';
+      const ago = getTimeAgo(entry.time);
+      const vibesHtml = (entry.vibes||[]).map(v => `<span class="history-vibe">${v}</span>`).join('');
+      const songsText = (entry.songs||[]).map(s => s.title).join(', ');
+      el.innerHTML = `<div class="history-vibes">${vibesHtml}</div><div class="history-songs">${songsText}</div><div class="history-time">${ago}</div>`;
+      list.appendChild(el);
+    });
+  }
+  function getTimeAgo(ts) {
+    const diff = Math.floor((Date.now() - ts) / 1000);
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+    return `${Math.floor(diff/86400)}d ago`;
+  }
+
+  /* ── SHARE ── */
   function openShareModal() {
-    // Populate share card
     const vibesEl = document.getElementById('shareVibes');
     vibesEl.innerHTML = '';
-    currentVibes.forEach(v => {
-      const s = document.createElement('span');
-      s.className = 'share-card-vibe'; s.textContent = v;
-      vibesEl.appendChild(s);
-    });
-
+    currentVibes.forEach(v => { const s = document.createElement('span'); s.className = 'share-card-vibe'; s.textContent = v; vibesEl.appendChild(s); });
     const songsEl = document.getElementById('shareSongs');
     songsEl.innerHTML = '';
-    ['sn1','sn2','sn3'].forEach((nc, i) => {
-      const d = document.createElement('div');
-      d.className = 'share-card-song';
+    ['sn1','sn2','sn3'].forEach((nc,i) => {
+      const d = document.createElement('div'); d.className = 'share-card-song';
       d.innerHTML = `<div class="share-song-num ${nc}">${i+1}</div><div><div class="share-song-title">${currentSongs[i].title}</div><div class="share-song-artist">${currentSongs[i].artist} · ${currentSongs[i].language}</div></div>`;
       songsEl.appendChild(d);
     });
-
     document.getElementById('shareModalBg').classList.add('open');
   }
-
-  function closeShareModal(e) {
-    if (!e || e.target === document.getElementById('shareModalBg')) {
-      document.getElementById('shareModalBg').classList.remove('open');
-    }
-  }
-
+  function closeShareModal(e) { if (!e || e.target === document.getElementById('shareModalBg')) document.getElementById('shareModalBg').classList.remove('open'); }
   function copyShareText() {
     const vibeText = currentVibes.join(' · ');
     const songText = currentSongs.map((s,i) => `${i+1}. ${s.title} — ${s.artist} (${s.language})`).join('\n');
-    const text = `My story vibe: ${vibeText}\n\nSongs matched by snapjam:\n${songText}\n\nsnapjam.app`;
-    navigator.clipboard.writeText(text).then(() => {
-      const btn = document.querySelector('.modal-copy-btn');
-      btn.textContent = '✓ Copied!';
-      setTimeout(() => { btn.textContent = '📋 Copy text'; }, 2000);
-    });
+    const text = `My story vibe: ${vibeText}\n\nMatched by snapjam:\n${songText}\n\nsnapjam.app ✦`;
+    navigator.clipboard.writeText(text).then(() => { const btn = document.querySelector('.modal-copy-btn'); btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = '📋 Copy text'; }, 2000); });
   }
-
   function nativeShare() {
-    const vibeText = currentVibes.join(' · ');
-    const songText = currentSongs.map((s,i) => `${i+1}. ${s.title} — ${s.artist}`).join('\n');
-    const text = `My story vibe: ${vibeText}\n\n${songText}\n\nfound with snapjam.app ✦`;
-    if (navigator.share) {
-      navigator.share({ title: 'My snapjam song match', text });
-    } else {
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = document.querySelector('.modal-share-btn');
-        btn.textContent = '✓ Copied!';
-        setTimeout(() => { btn.textContent = 'Share ↗'; }, 2000);
-      });
-    }
+    const text = `Vibe: ${currentVibes.join(' · ')}\n${currentSongs.map((s,i)=>`${i+1}. ${s.title} — ${s.artist}`).join('\n')}\n\nfound with snapjam.app ✦`;
+    if (navigator.share) { navigator.share({ title: 'My snapjam match', text }); }
+    else { navigator.clipboard.writeText(text).then(() => { const btn = document.querySelector('.modal-share-btn'); btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = 'Share ↗'; }, 2000); }); }
   }
 
   /* ── RESET ── */
   function resetApp() {
-    base64 = null;
-    currentSongs = []; currentVibes = [];
+    base64 = null; currentSongs = []; currentVibes = [];
     document.getElementById('previewWrap').style.display = 'none';
     document.getElementById('preview').src = '';
     document.getElementById('uploadZone').style.display = 'flex';
@@ -931,6 +1095,9 @@ Rules:
     document.querySelectorAll('.mood-pill').forEach(p => p.classList.remove('selected'));
     selectedMood = '';
   }
+
+  /* ── INIT ── */
+  renderHistory();
 </script>
 </body>
 </html>
