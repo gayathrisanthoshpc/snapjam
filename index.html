@@ -20,6 +20,7 @@
       --pink: #ff3cac; --violet: #6c4fff; --teal: #00e5c0; --gold: #ffb830;
       --card-bg: rgba(255,255,255,0.04); --input-bg: rgba(255,255,255,0.05);
       --shadow: 0 8px 40px rgba(0,0,0,0.4);
+      --error: #ff5f6d; --success: #00e5c0;
     }
     [data-theme="light"] {
       --bg: #f8f7ff; --surface: rgba(0,0,0,0.03); --glass: rgba(255,255,255,0.85);
@@ -27,6 +28,7 @@
       --text: #0e0c1e; --text2: #5a5778; --text3: #9a98b4;
       --card-bg: rgba(255,255,255,0.9); --input-bg: rgba(0,0,0,0.04);
       --shadow: 0 8px 40px rgba(0,0,0,0.08);
+      --error: #d63447; --success: #00b88d;
     }
 
     html { scroll-behavior: smooth; }
@@ -48,6 +50,7 @@
         radial-gradient(ellipse 35% 40% at 60% 20%, rgba(0,229,192,0.08) 0%, transparent 50%);
       animation: meshDrift 22s ease-in-out infinite alternate;
       transition: opacity 0.4s;
+      will-change: transform;
     }
     [data-theme="light"] .bg-mesh { opacity: 0.4; }
     @keyframes meshDrift { from{transform:translate(0,0) scale(1)} to{transform:translate(1.5%,2.5%) scale(1.04)} }
@@ -281,7 +284,10 @@
     .share-section { margin-top: 18px; }
     .share-btn { width: 100%; padding: 12px; border-radius: 14px; border: 1px solid var(--glass-border); background: var(--surface); color: var(--text2); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 7px; }
     .share-btn:hover { border-color: var(--violet); color: var(--text); background: rgba(108,79,255,0.08); }
-    .error-msg { font-size: 13px; color: #ff5f6d; text-align: center; margin-top: 10px; display: none; padding: 12px 16px; border-radius: 12px; background: rgba(255,95,109,0.07); border: 1px solid rgba(255,95,109,0.15); }
+    .error-msg { font-size: 13px; color: var(--error); text-align: center; margin-top: 10px; display: none; padding: 12px 16px; border-radius: 12px; background: rgba(255,95,109,0.07); border: 1px solid rgba(255,95,109,0.15); }
+    .error-msg.network { color: var(--error); }
+    .error-msg.timeout { color: var(--error); }
+    .error-msg.image { color: var(--error); }
 
     /* History */
     .history-section { margin-top: 24px; }
@@ -330,6 +336,7 @@
     .modal-actions { display: flex; gap: 10px; }
     .modal-copy-btn { flex: 1; padding: 11px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--surface); color: var(--text2); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
     .modal-copy-btn:hover { border-color: var(--teal); color: var(--teal); }
+    .modal-copy-btn.copied { border-color: var(--teal); color: var(--teal); }
     .modal-share-btn { flex: 1; padding: 11px; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--pink), var(--violet)); color: #fff; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity 0.2s; }
     .modal-share-btn:hover { opacity: 0.88; }
 
@@ -435,6 +442,7 @@
       .about-cta { padding: 28px 20px; }
       .site-footer { flex-direction: column; align-items: flex-start; gap: 12px; }
       .modal-actions { flex-direction: column; }
+      .share-modal { padding: 24px; }
     }
     @media (max-width: 400px) {
       .app-right { grid-template-columns: 1fr; }
@@ -450,7 +458,7 @@
 <div class="share-modal-bg" id="shareModalBg" onclick="closeShareModal(event)">
   <div class="share-modal">
     <button class="modal-close" onclick="closeShareModal()">✕</button>
-    <div class="modal-title">Share your match ✦</div>
+    <div class="modal-title" id="shareModalTitle">Share your match ✦</div>
     <div class="share-card-preview">
       <div class="share-card-inner">
         <div class="share-card-logo">snap<span>jam</span></div>
@@ -467,8 +475,8 @@
 </div>
 
 <!-- Mobile drawer -->
-<div class="mobile-drawer" id="mobileDrawer">
-  <button class="drawer-close" onclick="closeDrawer()">✕</button>
+<div class="mobile-drawer" id="mobileDrawer" role="dialog" aria-modal="true" aria-label="Navigation menu">
+  <button class="drawer-close" onclick="closeDrawer()" aria-label="Close navigation menu">✕</button>
   <button class="drawer-link" onclick="navigate('home');closeDrawer()">Home</button>
   <button class="drawer-link" onclick="navigate('app');closeDrawer()">Try it</button>
   <button class="drawer-link" onclick="navigate('faq');closeDrawer()">FAQ</button>
@@ -490,9 +498,9 @@
       <button class="nav-link"        id="nl-contact" onclick="navigate('contact')">Contact</button>
     </div>
     <div class="nav-right">
-      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">🌙</button>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Toggle theme" aria-label="Toggle dark/light theme">🌙</button>
       <button class="nav-cta" onclick="navigate('app')">Try snapjam ✦</button>
-      <button class="nav-mobile-toggle" onclick="openDrawer()"><span></span><span></span><span></span></button>
+      <button class="nav-mobile-toggle" onclick="openDrawer()" aria-label="Open navigation menu" aria-expanded="false" id="mobileToggleBtn"><span></span><span></span><span></span></button>
     </div>
   </nav>
 
@@ -633,16 +641,18 @@
 
           <div class="upload-zone" id="uploadZone"
             onclick="document.getElementById('fileInput').click()"
-            ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+            ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"
+            role="button" tabindex="0" aria-label="Upload photo zone. Click or drag and drop your image" aria-describedby="uploadHint">
             <div class="u-ring">📸</div>
             <p class="u-title">Tap or drop your story photo</p>
-            <p class="u-sub">jpg · png · webp · heic</p>
+            <p class="u-sub" id="uploadHint">jpg · png · webp · heic (max 2MB)</p>
             <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(event)"/>
           </div>
 
-          <div id="loadingSection">
+          <div id="loadingSection" role="status" aria-live="polite" aria-label="Analyzing photo">
             <div class="waveform"><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div></div>
             <p class="loading-label">Reading your vibe<span>.</span><span>.</span><span>.</span></p>
+            <button class="btn-ghost" id="cancelAnalysisBtn" onclick="cancelAnalysis()" style="display:none;margin-top:12px;">Cancel</button>
           </div>
 
           <div id="resultsSection">
@@ -658,7 +668,7 @@
             </div>
           </div>
 
-          <p class="error-msg" id="errorMsg">Something went wrong — please try again.</p>
+          <p class="error-msg" id="errorMsg"></p>
           <button class="btn-primary full" id="analyzeBtn" onclick="analyzePhoto()" style="display:none;margin-top:14px;">Find my songs →</button>
         </div>
 
@@ -843,6 +853,18 @@
 </div>
 
 <script>
+  /* ── CONSTANTS ── */
+  const API_TIMEOUT = 30000; // 30 seconds
+  const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+  const COMPRESSION_QUALITY = 0.7; // Image compression quality
+  const API_ENDPOINT = '/api/analyze'; // Backend endpoint (works both local and production)
+
+  /* ── SECURITY NOTE ── */
+  // IMPORTANT: API calls should be proxied through a backend server.
+  // NEVER expose API keys in client-side code.
+  // Current implementation needs: (1) Authorization header (must be in backend),
+  // (2) CORS handling via backend proxy, (3) Rate limiting (backend responsibility)
+
   /* ── NAVIGATION ── */
   const pages = {home:'page-home',app:'page-app',faq:'page-faq',about:'page-about',contact:'page-contact'};
   const navLinks = {home:'nl-home',app:'nl-app',faq:'nl-faq',about:'nl-about',contact:'nl-contact'};
@@ -863,16 +885,25 @@
   });
 
   /* ── THEME ── */
-  let isDark = true;
+  let isDark = localStorage.getItem('snapjam_theme') !== 'light';
   function toggleTheme() {
     isDark = !isDark;
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
+    localStorage.setItem('snapjam_theme', isDark ? 'dark' : 'light');
   }
+  // Apply saved theme on load
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
 
   /* ── MOBILE DRAWER ── */
-  function openDrawer()  { document.getElementById('mobileDrawer').classList.add('open'); }
-  function closeDrawer() { document.getElementById('mobileDrawer').classList.remove('open'); }
+  function openDrawer()  { 
+    document.getElementById('mobileDrawer').classList.add('open');
+    document.getElementById('mobileToggleBtn').setAttribute('aria-expanded', 'true');
+  }
+  function closeDrawer() { 
+    document.getElementById('mobileDrawer').classList.remove('open');
+    document.getElementById('mobileToggleBtn').setAttribute('aria-expanded', 'false');
+  }
 
   /* ── FAQ ── */
   function toggleFaq(el) {
@@ -899,6 +930,33 @@
     if (selectedMood) btn.classList.add('selected');
   }
 
+  /* ── IMAGE COMPRESSION ── */
+  async function compressImage(base64Data, mediaType) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        const maxDim = 1200;
+        if (width > height && width > maxDim) {
+          height = (height * maxDim) / width;
+          width = maxDim;
+        } else if (height > maxDim) {
+          width = (width * maxDim) / height;
+          height = maxDim;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL(mediaType, COMPRESSION_QUALITY).split(',')[1];
+        resolve(compressed);
+      };
+      img.onerror = () => resolve(base64Data);
+      img.src = 'data:' + mediaType + ';base64,' + base64Data;
+    });
+  }
+
   /* ── FILE / UPLOAD ── */
   let base64 = null, mediaType = 'image/jpeg';
   function handleFile(e) { const f = e.target.files[0]; if (f) loadImg(f); }
@@ -909,59 +967,134 @@
     const f = e.dataTransfer.files[0];
     if (f && f.type.startsWith('image/')) loadImg(f);
   }
+
+  // Keyboard support for upload zone
+  document.addEventListener('DOMContentLoaded', () => {
+    const uploadZone = document.getElementById('uploadZone');
+    if (uploadZone) {
+      uploadZone.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.code === 'Space') {
+          e.preventDefault();
+          document.getElementById('fileInput').click();
+        }
+      });
+    }
+  });
+
   function loadImg(file) {
+    // Validate file size
+    if (file.size > MAX_IMAGE_SIZE) {
+      showError('image', 'Image too large. Please use a file under 2MB.');
+      return;
+    }
+
     mediaType = file.type || 'image/jpeg';
     const r = new FileReader();
-    r.onload = e => {
-      base64 = e.target.result.split(',')[1];
-      document.getElementById('preview').src = e.target.result;
-      document.getElementById('previewWrap').style.display = 'block';
-      document.getElementById('uploadZone').style.display = 'none';
-      document.getElementById('analyzeBtn').style.display = 'flex';
-      document.getElementById('resultsSection').style.display = 'none';
-      document.getElementById('errorMsg').style.display = 'none';
-      document.getElementById('scanCorners').classList.add('visible');
+    r.onload = async (e) => {
+      try {
+        base64 = await compressImage(e.target.result.split(',')[1], mediaType);
+        document.getElementById('preview').src = e.target.result;
+        document.getElementById('previewWrap').style.display = 'block';
+        document.getElementById('uploadZone').style.display = 'none';
+        document.getElementById('analyzeBtn').style.display = 'flex';
+        document.getElementById('resultsSection').style.display = 'none';
+        document.getElementById('errorMsg').style.display = 'none';
+        document.getElementById('scanCorners').classList.add('visible');
+      } catch(err) {
+        showError('image', 'Failed to process image. Please try another file.');
+      }
     };
+    r.onerror = () => showError('image', 'Failed to read file. Please try again.');
     r.readAsDataURL(file);
   }
 
   /* ── SCAN ANIMATION ── */
   function startScan() { document.getElementById('scanOverlay').classList.add('scanning'); document.getElementById('scanLine').classList.add('scanning'); }
   function stopScan()  { document.getElementById('scanOverlay').classList.remove('scanning'); document.getElementById('scanLine').classList.remove('scanning'); }
+  
+  /* ── CANCEL ANALYSIS ── */
+  function cancelAnalysis() {
+    if (abortController) {
+      abortController.abort();
+      abortController = null;
+    }
+    stopScan();
+    document.getElementById('loadingSection').style.display = 'none';
+    document.getElementById('cancelAnalysisBtn').style.display = 'none';
+    document.getElementById('analyzeBtn').style.display = 'flex';
+    document.getElementById('errorMsg').textContent = 'Analysis cancelled.';
+    document.getElementById('errorMsg').className = 'error-msg';
+    document.getElementById('errorMsg').style.display = 'block';
+  }
+
+  /* ── ERROR DISPLAY ── */
+  function showError(type, message) {
+    const errorEl = document.getElementById('errorMsg');
+    errorEl.textContent = message;
+    errorEl.className = 'error-msg ' + type;
+    errorEl.style.display = 'block';
+  }
 
   /* ── ANALYZE ── */
-  let currentSongs = [], currentVibes = [];
+  let currentSongs = [], currentVibes = [], abortController = null;
 
   async function analyzePhoto() {
     if (!base64) return;
+    
+    // Reset state
     document.getElementById('analyzeBtn').style.display = 'none';
     document.getElementById('loadingSection').style.display = 'flex';
     document.getElementById('resultsSection').style.display = 'none';
     document.getElementById('errorMsg').style.display = 'none';
+    document.getElementById('cancelAnalysisBtn').style.display = 'flex';
     startScan();
 
-    const moodStr = selectedMood ? ` The user's mood preference is: ${selectedMood}.` : '';
+    abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), API_TIMEOUT);
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const res = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        signal: abortController.signal,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514', max_tokens: 1000,
-          system: `You are a global Instagram music expert and photo vibe analyst.${moodStr} Analyze the photo's mood, colors, setting, and energy. Return ONLY valid JSON — no text, no markdown:
-{"vibes":["word1","word2","word3"],"songs":[{"title":"Song Title","artist":"Artist Name","language":"Language"},{"title":"Song Title","artist":"Artist Name","language":"Language"},{"title":"Song Title","artist":"Artist Name","language":"Language"}]}
-Rules: vibes = exactly 3 short evocative mood words. songs = exactly 3 songs from 3 DIFFERENT languages, always include at least one non-English song from Hindi/Malayalam/Tamil/Telugu/Punjabi/Korean/Spanish/Arabic/French/Portuguese/Japanese/Turkish/Swahili etc. Only suggest songs trending and available in Instagram music library.`,
-          messages: [{ role: 'user', content: [
-            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-            { type: 'text', text: 'Analyze this photo and suggest 3 Instagram story songs from different languages.' }
-          ]}]
+          image: base64,
+          mood: selectedMood
         })
       });
 
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        if (res.status === 429) {
+          showError('network', 'Request limit reached. Please wait a moment and try again.');
+        } else if (res.status === 400 && errorData.error?.message?.includes('vision')) {
+          showError('image', 'Could not analyze this image. Try a clearer photo.');
+        } else {
+          showError('network', 'API error. Please try again in a moment.');
+        }
+        stopScan();
+        document.getElementById('loadingSection').style.display = 'none';
+        document.getElementById('cancelAnalysisBtn').style.display = 'none';
+        document.getElementById('analyzeBtn').style.display = 'flex';
+        return;
+      }
+
       const data = await res.json();
-      const text = data.content.map(i => i.text || '').join('');
-      const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
-      currentVibes = parsed.vibes || [];
-      currentSongs = parsed.songs || [];
+      const parsed = data;
+      
+      if (!parsed.vibes || !parsed.songs || parsed.vibes.length !== 3 || parsed.songs.length !== 3) {
+        showError('network', 'Invalid response format. Please try again.');
+        stopScan();
+        document.getElementById('loadingSection').style.display = 'none';
+        document.getElementById('cancelAnalysisBtn').style.display = 'none';
+        document.getElementById('analyzeBtn').style.display = 'flex';
+        return;
+      }
+
+      currentVibes = parsed.vibes;
+      currentSongs = parsed.songs;
       stopScan();
 
       // Vibe tags
@@ -974,34 +1107,58 @@ Rules: vibes = exactly 3 short evocative mood words. songs = exactly 3 songs fro
       list.innerHTML = '';
       ['n1','n2','n3'].forEach((nc, i) => {
         const c = document.createElement('div'); c.className = 'song-card';
-        const igSearch = `https://www.instagram.com/`;
         c.innerHTML = `
           <div class="snum ${nc}">${i+1}</div>
           <div class="sinfo">
-            <div class="stitle">${currentSongs[i].title}</div>
-            <div class="sartist">${currentSongs[i].artist}</div>
+            <div class="stitle">${escapeHtml(currentSongs[i].title)}</div>
+            <div class="sartist">${escapeHtml(currentSongs[i].artist)}</div>
           </div>
           <div class="song-right">
-            <span class="slang">${currentSongs[i].language}</span>
-            <button class="copy-btn" title="Copy" onclick="copySong(this,'${(currentSongs[i].title+' - '+currentSongs[i].artist).replace(/'/g,"\\'")}')">⎘</button>
-            <a class="ig-search-btn" href="${igSearch}" target="_blank" title="Search on Instagram">↗</a>
+            <span class="slang">${escapeHtml(currentSongs[i].language)}</span>
+            <button class="copy-btn" title="Copy" onclick="copySong(this,'${escapeSingleQuotes(currentSongs[i].title + ' - ' + currentSongs[i].artist)}')">⎘</button>
+            <a class="ig-search-btn" href="https://www.instagram.com/reels/" target="_blank" title="Search on Instagram">↗</a>
           </div>`;
         list.appendChild(c);
       });
 
       document.getElementById('loadingSection').style.display = 'none';
+      document.getElementById('cancelAnalysisBtn').style.display = 'none';
       document.getElementById('resultsSection').style.display = 'flex';
+      
+      // Smooth scroll to results
+      setTimeout(() => {
+        document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
 
       // Save to history
       saveHistory();
 
     } catch (err) {
+      clearTimeout(timeoutId);
       stopScan();
       document.getElementById('loadingSection').style.display = 'none';
-      document.getElementById('errorMsg').style.display = 'block';
+      document.getElementById('cancelAnalysisBtn').style.display = 'none';
+      
+      if (err.name === 'AbortError') {
+        showError('timeout', 'Request cancelled.');
+      } else {
+        showError('network', 'Network error. Please check your connection and try again.');
+        console.error('API error:', err);
+      }
+      
       document.getElementById('analyzeBtn').style.display = 'flex';
       document.getElementById('analyzeBtn').textContent = 'Try again →';
     }
+  }
+
+  /* ── UTILITIES ── */
+  function escapeHtml(text) {
+    const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
+    return text.replace(/[&<>"']/g, m => map[m]);
+  }
+
+  function escapeSingleQuotes(text) {
+    return text.replace(/'/g, "\\'");
   }
 
   /* ── COPY ── */
@@ -1009,6 +1166,8 @@ Rules: vibes = exactly 3 short evocative mood words. songs = exactly 3 songs fro
     navigator.clipboard.writeText(text).then(() => {
       btn.classList.add('copied'); btn.textContent = '✓';
       setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '⎘'; }, 2000);
+    }).catch(() => {
+      alert('Failed to copy. Please try manually.');
     });
   }
 
@@ -1018,16 +1177,19 @@ Rules: vibes = exactly 3 short evocative mood words. songs = exactly 3 songs fro
     const entry = { vibes: currentVibes, songs: currentSongs, time: Date.now() };
     history.unshift(entry);
     history = history.slice(0, 5);
-    try { localStorage.setItem('snapjam_history', JSON.stringify(history)); } catch(e) {}
+    try { localStorage.setItem('snapjam_history', JSON.stringify(history)); } catch(e) { console.warn('localStorage unavailable'); }
     renderHistory();
   }
+
   function getHistory() {
     try { return JSON.parse(localStorage.getItem('snapjam_history') || '[]'); } catch(e) { return []; }
   }
+
   function clearHistory() {
     try { localStorage.removeItem('snapjam_history'); } catch(e) {}
     document.getElementById('historySection').style.display = 'none';
   }
+
   function renderHistory() {
     const history = getHistory();
     if (!history.length) { document.getElementById('historySection').style.display = 'none'; return; }
@@ -1035,14 +1197,37 @@ Rules: vibes = exactly 3 short evocative mood words. songs = exactly 3 songs fro
     const list = document.getElementById('historyList');
     list.innerHTML = '';
     history.forEach(entry => {
-      const el = document.createElement('div'); el.className = 'history-item';
+      const el = document.createElement('div');
+      el.className = 'history-item';
       const ago = getTimeAgo(entry.time);
-      const vibesHtml = (entry.vibes||[]).map(v => `<span class="history-vibe">${v}</span>`).join('');
-      const songsText = (entry.songs||[]).map(s => s.title).join(', ');
-      el.innerHTML = `<div class="history-vibes">${vibesHtml}</div><div class="history-songs">${songsText}</div><div class="history-time">${ago}</div>`;
+      
+      // Create vibes container
+      const vibesDiv = document.createElement('div');
+      vibesDiv.className = 'history-vibes';
+      (entry.vibes || []).forEach(v => {
+        const vibe = document.createElement('span');
+        vibe.className = 'history-vibe';
+        vibe.textContent = v;
+        vibesDiv.appendChild(vibe);
+      });
+      el.appendChild(vibesDiv);
+      
+      // Create songs text
+      const songsDiv = document.createElement('div');
+      songsDiv.className = 'history-songs';
+      songsDiv.textContent = (entry.songs || []).map(s => s.title).join(', ');
+      el.appendChild(songsDiv);
+      
+      // Create time text
+      const timeDiv = document.createElement('div');
+      timeDiv.className = 'history-time';
+      timeDiv.textContent = ago;
+      el.appendChild(timeDiv);
+      
       list.appendChild(el);
     });
   }
+
   function getTimeAgo(ts) {
     const diff = Math.floor((Date.now() - ts) / 1000);
     if (diff < 60) return 'just now';
@@ -1055,38 +1240,79 @@ Rules: vibes = exactly 3 short evocative mood words. songs = exactly 3 songs fro
   function openShareModal() {
     const vibesEl = document.getElementById('shareVibes');
     vibesEl.innerHTML = '';
-    currentVibes.forEach(v => { const s = document.createElement('span'); s.className = 'share-card-vibe'; s.textContent = v; vibesEl.appendChild(s); });
+    currentVibes.forEach(v => {
+      const s = document.createElement('span');
+      s.className = 'share-card-vibe';
+      s.textContent = v;
+      vibesEl.appendChild(s);
+    });
     const songsEl = document.getElementById('shareSongs');
     songsEl.innerHTML = '';
-    ['sn1','sn2','sn3'].forEach((nc,i) => {
-      const d = document.createElement('div'); d.className = 'share-card-song';
-      d.innerHTML = `<div class="share-song-num ${nc}">${i+1}</div><div><div class="share-song-title">${currentSongs[i].title}</div><div class="share-song-artist">${currentSongs[i].artist} · ${currentSongs[i].language}</div></div>`;
+    ['sn1','sn2','sn3'].forEach((nc, i) => {
+      const d = document.createElement('div');
+      d.className = 'share-card-song';
+      const numDiv = document.createElement('div');
+      numDiv.className = `share-song-num ${nc}`;
+      numDiv.textContent = String(i + 1);
+      d.appendChild(numDiv);
+      const infoDiv = document.createElement('div');
+      const titleDiv = document.createElement('div');
+      titleDiv.className = 'share-song-title';
+      titleDiv.textContent = currentSongs[i].title;
+      const artistDiv = document.createElement('div');
+      artistDiv.className = 'share-song-artist';
+      artistDiv.textContent = currentSongs[i].artist + ' · ' + currentSongs[i].language;
+      infoDiv.appendChild(titleDiv);
+      infoDiv.appendChild(artistDiv);
+      d.appendChild(infoDiv);
       songsEl.appendChild(d);
     });
     document.getElementById('shareModalBg').classList.add('open');
   }
+
   function closeShareModal(e) { if (!e || e.target === document.getElementById('shareModalBg')) document.getElementById('shareModalBg').classList.remove('open'); }
+
   function copyShareText() {
     const vibeText = currentVibes.join(' · ');
     const songText = currentSongs.map((s,i) => `${i+1}. ${s.title} — ${s.artist} (${s.language})`).join('\n');
     const text = `My story vibe: ${vibeText}\n\nMatched by snapjam:\n${songText}\n\nsnapjam.app ✦`;
-    navigator.clipboard.writeText(text).then(() => { const btn = document.querySelector('.modal-copy-btn'); btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = '📋 Copy text'; }, 2000); });
+    navigator.clipboard.writeText(text).then(() => { 
+      const btn = document.querySelector('.modal-copy-btn'); 
+      btn.classList.add('copied');
+      btn.textContent = '✓ Copied!'; 
+      setTimeout(() => { 
+        btn.classList.remove('copied');
+        btn.textContent = '📋 Copy text'; 
+      }, 2000); 
+    }).catch(() => {
+      alert('Failed to copy. Please try manually.');
+    });
   }
+
   function nativeShare() {
     const text = `Vibe: ${currentVibes.join(' · ')}\n${currentSongs.map((s,i)=>`${i+1}. ${s.title} — ${s.artist}`).join('\n')}\n\nfound with snapjam.app ✦`;
-    if (navigator.share) { navigator.share({ title: 'My snapjam match', text }); }
-    else { navigator.clipboard.writeText(text).then(() => { const btn = document.querySelector('.modal-share-btn'); btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = 'Share ↗'; }, 2000); }); }
+    if (navigator.share) { 
+      navigator.share({ title: 'My snapjam match', text }).catch(() => {}); 
+    } else { 
+      navigator.clipboard.writeText(text).then(() => { 
+        const btn = document.querySelector('.modal-share-btn'); 
+        btn.textContent = '✓ Copied!'; 
+        setTimeout(() => { btn.textContent = 'Share ↗'; }, 2000); 
+      }).catch(() => {
+        alert('Failed to share. Please try manually.');
+      });
+    }
   }
 
   /* ── RESET ── */
   function resetApp() {
     base64 = null; currentSongs = []; currentVibes = [];
+    if (abortController) abortController.abort();
     document.getElementById('previewWrap').style.display = 'none';
     document.getElementById('preview').src = '';
     document.getElementById('uploadZone').style.display = 'flex';
     document.getElementById('analyzeBtn').style.display = 'none';
     document.getElementById('analyzeBtn').textContent = 'Find my songs →';
-    document.getElementById('analyzeBtn').onclick = analyzePhoto;
     document.getElementById('resultsSection').style.display = 'none';
     document.getElementById('errorMsg').style.display = 'none';
     document.getElementById('fileInput').value = '';

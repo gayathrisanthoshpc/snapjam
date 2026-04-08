@@ -1,0 +1,8 @@
+{
+  "buildCommand": "echo 'Demo mode - no build needed'",
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs20.x"
+    }
+  }
+}
