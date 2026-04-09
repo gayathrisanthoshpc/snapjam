@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "AI music matcher for Instagram stories",
   "private": true,
+  "type": "module",
   "license": "MIT",
   "scripts": {
     "dev": "vercel dev",
