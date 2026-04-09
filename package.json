@@ -7,7 +7,6 @@
   "license": "MIT",
   "scripts": {
     "dev": "vercel dev",
-    "build": "echo 'No build needed'",
     "deploy": "vercel deploy --prod"
   },
   "dependencies": {
