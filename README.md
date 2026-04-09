@@ -1,22 +1,43 @@
-# Deploy snapjam in 5 Minutes (Demo Mode - FREE)
+# Deploy snapjam in 5 Minutes (AI-Powered - FREE Tier)
 
-## Step 1: Push to GitHub
+## Step 1: Get OpenAI API Key (FREE $5 credit for new users)
+
+1. Go to [platform.openai.com](https://platform.openai.com)
+2. Sign up for a free account
+3. Navigate to API Keys and create a new key
+4. Copy the key (keep it safe!)
+
+## Step 2: Push to GitHub
 
 ```bash
 git init
 git add .
-git commit -m "Deploy snapjam demo"
+git commit -m "Deploy snapjam AI"
 git branch -M main
 git remote add origin https://github.com/YOUR-USERNAME/snapjam.git
 git push -u origin main
 ```
 
-## Step 2: Deploy on Vercel (1 click)
+## Step 3: Deploy on Vercel
 
 1. Go to [vercel.com](https://vercel.com)
 2. Click **"New Project"**
 3. Select your `snapjam` GitHub repository
-4. Click **"Deploy"** ✨
+4. Add Environment Variable:
+   - Name: `OPENAI_API_KEY`
+   - Value: Your OpenAI API key
+5. Click **"Deploy"** ✨
+
+## Local Development
+
+```bash
+npm install
+# Set your API key
+echo "OPENAI_API_KEY=your-key-here" > .env
+vercel dev
+```
+
+Your app will be live with real AI analysis! 🎵
 
 **Done!** Your app is live at: `https://snapjam-xxx.vercel.app`
 

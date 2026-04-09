@@ -1,51 +1,8 @@
-/**
- * Vercel Function - Demo Mode
- * Returns realistic demo data (no API key needed)
- * Replace with AI backend when ready: see DEPLOY.md
- */
+import OpenAI from 'openai';
 
-const DEMO_SONGS = [
-  {
-    vibes: ['Golden', 'Nostalgic', 'Warm'],
-    songs: [
-      { title: 'Kesariya', artist: 'Arijit Singh', language: 'Hindi' },
-      { title: 'Levitating', artist: 'Dua Lipa', language: 'English' },
-      { title: 'Dynamite', artist: 'BTS', language: 'Korean' },
-    ],
-  },
-  {
-    vibes: ['Energetic', 'Bold', 'Urban'],
-    songs: [
-      { title: 'Blinding Lights', artist: 'The Weeknd', language: 'English' },
-      { title: 'Hawái', artist: 'Maluma', language: 'Spanish' },
-      { title: 'Buttabomma', artist: 'Anirudh Ravichander', language: 'Telugu' },
-    ],
-  },
-  {
-    vibes: ['Peaceful', 'Dreamy', 'Soft'],
-    songs: [
-      { title: 'Yoru ni Kakeru', artist: 'YOASOBI', language: 'Japanese' },
-      { title: 'Mon Amour', artist: 'Isabelle Pierre', language: 'French' },
-      { title: 'Rowdy Baby', artist: 'Dhanush', language: 'Tamil' },
-    ],
-  },
-  {
-    vibes: ['Joyful', 'Celebratory', 'Happy'],
-    songs: [
-      { title: 'Shape of You', artist: 'Ed Sheeran', language: 'English' },
-      { title: 'Lean on Me', artist: 'Tauren Wells', language: 'English' },
-      { title: 'Lehanga', artist: 'Aman Jaji', language: 'Punjabi' },
-    ],
-  },
-  {
-    vibes: ['Romantic', 'Tender', 'Intimate'],
-    songs: [
-      { title: 'Perfect', artist: 'Ed Sheeran', language: 'English' },
-      { title: 'Oru Adaar Love', artist: 'Sooraj Santhosh', language: 'Malayalam' },
-      { title: 'Tum Se', artist: 'Jubin Nautiyal', language: 'Hindi' },
-    ],
-  },
-];
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -67,31 +24,51 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Simulate processing
-    await new Promise(resolve => setTimeout(resolve, 800));
+    // Remove data URL prefix if present
+    const base64Image = image.replace(/^data:image\/[a-z]+;base64,/, '');
 
-    // Get random demo result
-    const demoIndex = Math.floor(Math.random() * DEMO_SONGS.length);
-    const result = { ...DEMO_SONGS[demoIndex] };
+    const prompt = `Analyze this image and determine the mood/vibe. Then suggest 3 songs from around the world that match this vibe. Return in JSON format: {"vibes": ["vibe1", "vibe2", "vibe3"], "songs": [{"title": "Song Title", "artist": "Artist Name", "language": "Language"}]} ${mood ? `The user specified mood: ${mood}` : ''}`;
 
-    // Adjust vibes based on mood if provided
-    if (mood) {
-      const moodMap = {
-        Chill: ['Relaxed', 'Chill', 'Laid-back'],
-        Hype: ['Energetic', 'Hype', 'Pumped'],
-        Sad: ['Melancholic', 'Emotional', 'Introspective'],
-        Romantic: ['Romantic', 'Tender', 'Intimate'],
-        Adventure: ['Adventurous', 'Daring', 'Explorer'],
-        Party: ['Fun', 'Party', 'Celebratory'],
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:image/jpeg;base64,${base64Image}`,
+              },
+            },
+          ],
+        },
+      ],
+      max_tokens: 500,
+    });
+
+    const content = response.choices[0].message.content;
+    let result;
+    try {
+      result = JSON.parse(content);
+    } catch (parseError) {
+      // Fallback if JSON parsing fails
+      result = {
+        vibes: ['Creative', 'Unique', 'Expressive'],
+        songs: [
+          { title: 'Unknown Song', artist: 'AI Generated', language: 'English' },
+          { title: 'Another Tune', artist: 'Music AI', language: 'English' },
+          { title: 'Vibe Match', artist: 'Global Artist', language: 'English' },
+        ],
       };
-      result.vibes = moodMap[mood] || result.vibes;
     }
 
     return res.status(200).json(result);
   } catch (error) {
-    console.error('Backend error:', error);
+    console.error('OpenAI API error:', error);
     return res.status(500).json({
-      error: error.message || 'Server error. Please try again.',
+      error: error.message || 'AI analysis failed. Please try again.',
     });
   }
 }

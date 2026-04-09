@@ -11,5 +11,8 @@
   },
   "devDependencies": {
     "vercel": "latest"
+  },
+  "dependencies": {
+    "openai": "^4.52.7"
   }
 }
